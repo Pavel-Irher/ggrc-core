@@ -152,6 +152,11 @@ class Dashboard(widget_bar.Dashboard, Header):
     self._browser.element(class_name="get-started__list__item",
                           text="Start new Workflow").click()
 
+  def start_create_task_group(self):
+    """Clicks "Create" button."""
+    self._browser.element(
+      class_name="section-create action-button create-button").click()
+
   @property
   def is_add_tab_present(self):
     """Checks presence of Add Tab"""

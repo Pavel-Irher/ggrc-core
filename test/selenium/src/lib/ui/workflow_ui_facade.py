@@ -61,6 +61,14 @@ def get_objs_added_to_task_group(task_group):
   return setup_tab.get_objs_added_to_task_group(task_group)
 
 
+def add_task_group(workflow, task_group):
+  """Adds task group."""
+  setup_tab = workflow_tabs.SetupTab()
+  setup_tab.open_via_url(workflow)
+  dashboard.Dashboard().start_create_task_group()
+  setup_tab.add_task_group(task_group)
+
+
 def delete_task_group(task_group):
   """Deletes task group."""
   setup_tab = workflow_tabs.SetupTab()

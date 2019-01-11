@@ -175,6 +175,13 @@ class TestWorkflowSetupTab(base.Test):
     assert not workflow_ui_facade.task_group_objs(app_workflow)
     assert ui_facade.active_tab_name() == "Setup (0)"
 
+  def test_add_task_group(self, app_workflow, selenium):
+    """Test creation of task group."""
+    task_group = workflow_entity_factory.TaskGroupFactory().create()
+    workflow_ui_facade.add_task_group(app_workflow, task_group)
+    assert workflow_ui_facade.task_group_objs(app_workflow)
+    assert ui_facade.active_tab_name() == "Setup (1)"
+
 
 class TestActivateWorkflow(base.Test):
   """Test workflow activation and actions available after activation."""
