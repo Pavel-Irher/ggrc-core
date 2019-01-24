@@ -306,6 +306,16 @@ class ModalCloneOrCreateAssessmentTemplates(CommonModalUnifiedMapper):
                        " .modal-footer--trailed collapse-panel-click-area")
 
 
+class ModalAssignUserRole(CommonModalUnifiedMapper):
+  """Locators for Assign User Role modal"""
+  MODAL = Common.MODAL_MAPPER
+  # user input elements
+  ROLE_RADIO_BUTTONS = (By.CSS_SELECTOR,
+                        MODAL + ' .selector-list.people-selector ul')
+  BUTTON_SAVE_AND_CLOSE = (By.CSS_SELECTOR,
+                           MODAL + ' [xdata-toggle="modal-submit"]')
+
+
 class BaseModalCreateNew(object):
   """Locators for Create new object modals."""
   MODAL = Common.MODAL_CREATE
@@ -964,6 +974,11 @@ class WidgetAdminPeople(object):
       By.CSS_SELECTOR, "[name=search]")
   CREATE_PERSON_BUTTON_SELECTOR = (
       By.CSS_SELECTOR, '.create-button')
+  PERSON_INFO_DD_SELECTOR = (By.CSS_SELECTOR, '.openclose')
+  BUTTON_3BBS_DD_SELECTOR = (
+    By.CSS_SELECTOR, '.btn.btn-3bbps.dropdown-toggle')
+  EDIT_AUTHORISATIONS_SELECTOR = (
+      By.CSS_SELECTOR, 'user-roles-selector-button')
 
 
 class CommonDropdownMenu(object):

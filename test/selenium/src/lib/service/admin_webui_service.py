@@ -5,6 +5,7 @@
 from lib import url
 from lib.page import dashboard
 from lib.page.modal.create_new_person import CreateNewPersonModal
+from lib.page.modal.user_role_assignments_modal import UserRoleAssignmentsModal
 from lib.utils import selenium_utils
 
 
@@ -53,6 +54,25 @@ class PeopleAdminWebUiService(AdminWebUiService):
     self.people_widget.filter_by_name_email_company(person.email)
     selenium_utils.wait_for_js_to_load(self._driver)
     return self.people_widget.get_people()[0]
+
+  def get_person_role(self, person):
+    """Return role of a person"""
+    return self.find_filtered_person(person).system_wide_role
+
+  def assign_person_role(self, person, role):
+    """Assign specified role to a person"""
+    assign_role_modal = self.open_user_role_assignments_modal(person)
+    assign_role_modal.assign_role(role)
+    assign_role_modal.save_and_close()
+
+  def open_user_role_assignments_modal(self, person):
+    """Open User Role Assignments modal for specified person
+      - Return: lib.page.modal.UserRoleAssignmentsModal"""
+    self.find_filtered_person(person)
+    self.people_widget.expand_person_info()
+    self.people_widget.open_details_dropdown()
+    self.people_widget.click_edit_authorisations_link()
+    return UserRoleAssignmentsModal(self._driver)
 
   @property
   def ppl_count(self):

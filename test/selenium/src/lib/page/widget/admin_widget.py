@@ -90,6 +90,24 @@ class People(dashboard.AdminDashboard):
         self._driver, self._locators.CREATE_PERSON_BUTTON_SELECTOR)
     add_button.click()
 
+  def expand_person_info(self):
+    """Click on person expand button"""
+    expand_button = selenium_utils.get_when_visible(
+        self._driver, self._locators.PERSON_INFO_DD_SELECTOR)
+    expand_button.click()
+
+  def open_details_dropdown(self):
+    """Click on 3dds button"""
+    details = selenium_utils.get_when_visible(
+        self._driver, self._locators.BUTTON_3BBS_DD_SELECTOR)
+    details.click()
+
+  def click_edit_authorisations_link(self):
+    """Click on Edit Authorisation link"""
+    link = selenium_utils.get_when_visible(
+        self._driver, self._locators.EDIT_AUTHORISATIONS_SELECTOR)
+    link.click()
+
   def filter_by_name_email_company(self, str_to_filter_by):
     """Filter people via filter by name email company text field"""
     filter_tf = base.TextInputField(

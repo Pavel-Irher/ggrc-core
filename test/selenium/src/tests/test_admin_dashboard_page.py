@@ -296,10 +296,21 @@ class TestPeopleAdministration(base.Test):
     return self.__class__.data
 
   def test_destructive_create_new_person_w_no_role(self, ppl_data):
-    """Check newly created person is on Admin People widget and ppl count
+    """Check newly created person is on Admin People widget and ppl count0
     increased by one.
     """
     self.general_equal_assert(ppl_data["exp_person"], ppl_data["act_person"])
+
+  def test_edit_user_role(self, app_person, selenium):
+    """Check Admin can edit user role in User Role Assignments modal """
+    exp_role = roles.CREATOR
+    ppl_admin_service = admin_webui_service.PeopleAdminWebUiService(
+      selenium)
+    ppl_admin_service.assign_person_role(app_person, exp_role)
+    # get new instance of PeopleAdminWebUiService to get changed role visible
+    fact_role = admin_webui_service.PeopleAdminWebUiService(
+      selenium).get_person_role(app_person)
+    assert fact_role == exp_role
 
   @pytest.mark.xfail(reason="GGRC-6528 Issue in app.")
   def test_destructive_tab_count_increased(self, ppl_data):
