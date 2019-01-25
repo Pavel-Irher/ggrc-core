@@ -976,7 +976,7 @@ class WidgetAdminPeople(object):
       By.CSS_SELECTOR, '.create-button')
   PERSON_INFO_DD_SELECTOR = (By.CSS_SELECTOR, '.openclose')
   BUTTON_3BBS_DD_SELECTOR = (
-    By.CSS_SELECTOR, '.btn.btn-3bbps.dropdown-toggle')
+      By.CSS_SELECTOR, '.btn.btn-3bbps.dropdown-toggle')
   EDIT_AUTHORISATIONS_SELECTOR = (
       By.CSS_SELECTOR, 'user-roles-selector-button')
 

@@ -14,11 +14,11 @@ class UserRoleAssignmentsModal(base.Modal):
   def __init__(self, driver):
     super(UserRoleAssignmentsModal, self).__init__(driver)
     self.modal_elem = selenium_utils.get_when_visible(
-      self._driver, self._locators.MODAL_CSS)
+        self._driver, self._locators.MODAL_CSS)
     self.role_radio_buttons = base.ElementsList(
-      self.modal_elem, self._locators.ROLE_RADIO_BUTTONS)
+        self.modal_elem, self._locators.ROLE_RADIO_BUTTONS)
     self.button_save_and_close = base.Button(
-      self.modal_elem, self._locators.BUTTON_SAVE_AND_CLOSE)
+        self.modal_elem, self._locators.BUTTON_SAVE_AND_CLOSE)
 
   def assign_role(self, role):
     """Click on specified role radiobutton on modal"""

@@ -61,11 +61,11 @@ class PeopleAdminWebUiService(AdminWebUiService):
 
   def assign_person_role(self, person, role):
     """Assign specified role to a person"""
-    assign_role_modal = self.open_user_role_assignments_modal(person)
+    assign_role_modal = self.open_role_assignments_modal(person)
     assign_role_modal.assign_role(role)
     assign_role_modal.save_and_close()
 
-  def open_user_role_assignments_modal(self, person):
+  def open_role_assignments_modal(self, person):
     """Open User Role Assignments modal for specified person
       - Return: lib.page.modal.UserRoleAssignmentsModal"""
     self.find_filtered_person(person)
