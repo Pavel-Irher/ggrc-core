@@ -143,7 +143,8 @@ class SetupTab(object_page.ObjectPage):
     self.open_task_group(task_group)
     return self._task_group_panel.added_objs
 
-  def add_task_group(self, task_group):
+  @staticmethod
+  def add_task_group(task_group):
     """Adds task group."""
     object_modal.get_modal_obj("task_group").submit_obj(task_group)
 

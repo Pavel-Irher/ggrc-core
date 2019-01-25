@@ -155,7 +155,7 @@ class Dashboard(widget_bar.Dashboard, Header):
   def start_create_task_group(self):
     """Clicks "Create" button."""
     self._browser.element(
-      class_name="section-create action-button create-button").click()
+        class_name="section-create action-button create-button").click()
 
   @property
   def is_add_tab_present(self):
