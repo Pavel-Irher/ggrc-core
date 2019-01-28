@@ -57,6 +57,7 @@ class TestControlsWorkflow(base.Test):
     users.set_current_user(creator)
     return reviewer
 
+  @pytest.mark.smoke_tests
   def test_add_control_reviewer(self, users_setup, selenium, new_control_rest):
     """Confirm reviewer is is displayed on Control Info panel"""
     reviewer = users_setup
