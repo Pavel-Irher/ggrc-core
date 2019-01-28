@@ -805,6 +805,18 @@ class Controls(WithAssignFolder, WithObjectReview, InfoWidget):
     return self._related_people_list(
         roles.CONTROL_OPERATORS, self._root)
 
+  @property
+  def control_reviewers(self):
+    """Returns Reviewers list"""
+    header = selenium_utils.get_when_visible(
+        self._driver, self._locators.PEOPLE_HEADER_CSS).text
+    if header.startswith("REVIEWER"):
+      reviewers = selenium_utils.get_when_visible(
+          self._driver, self._locators.PEOPLE_VALUE_CSS).text
+    else:
+      reviewers = ""
+    return reviewers.split("\n")
+
   def _add_obj_review_to_lsopes(self):
     """Extend list of scopes by object review section """
     review_msg = None

@@ -681,6 +681,15 @@ class ControlsService(SnapshotsWebUiService):
     super(ControlsService, self).__init__(
         driver, objects.CONTROLS, is_versions_widget)
 
+  @staticmethod
+  def is_reviewer_displayed(widget, user_email):
+    """Check if Reviewer displayed"""
+    reviewers = widget.control_reviewers
+    for reviewer in reviewers:
+      if reviewer == user_email:
+        return True
+    return False
+
 
 class ObjectivesService(SnapshotsWebUiService):
   """Class for Objectives business layer's services objects."""
