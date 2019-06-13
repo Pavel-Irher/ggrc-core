@@ -59,7 +59,7 @@ class TestBasicCsvImport(TestCase):
           policy.access_control_list[0][0].email
       )
       owner = models.Person.query.filter_by(email="user@example.com").first()
-      self.assert_roles(policy, Admin=owner)
+      self.assert_roles(policy, Admins=owner)
 
     filename = "policy_import_working_with_warnings.csv"
     response_json = self.import_file(filename, safe=False)
@@ -68,9 +68,9 @@ class TestBasicCsvImport(TestCase):
         errors.UNKNOWN_USER_WARNING.format(line=3, email="miha@policy.com"),
         errors.UNKNOWN_OBJECT.format(
             line=3, object_type="Program", slug="p753"),
-        errors.OWNER_MISSING.format(line=4, column_name="Admin"),
+        errors.OWNER_MISSING.format(line=4, column_name="Admins"),
         errors.UNKNOWN_USER_WARNING.format(line=6, email="not@a.user"),
-        errors.OWNER_MISSING.format(line=6, column_name="Admin"),
+        errors.OWNER_MISSING.format(line=6, column_name="Admins"),
     }
     response_warnings = response_json[0]["row_warnings"]
     self.assertEqual(expected_warnings, set(response_warnings))
@@ -92,7 +92,7 @@ class TestBasicCsvImport(TestCase):
       self.assertEqual("user@example.com",
                        policy.access_control_list[0][0].email)
       owner = models.Person.query.filter_by(email="user@example.com").first()
-      self.assert_roles(policy, Admin=owner)
+      self.assert_roles(policy, Admins=owner)
 
     filename = "policy_same_titles.csv"
     response_json = self.import_file(filename, safe=False)
@@ -142,7 +142,7 @@ class TestBasicCsvImport(TestCase):
             ("object_type", "facility"),
             ("Code*", "HOUSE-{}".format(idx)),
             ("title", "Facility-{}".format(idx)),
-            ("admin", "user@example.com"),
+            ("admins", "user@example.com"),
             ("assignee", "user@example.com"),
             ("verifier", "user@example.com"),
             ("map:facility", "" if idx == 1 else "HOUSE-{}".format(idx - 1)),
@@ -154,7 +154,7 @@ class TestBasicCsvImport(TestCase):
             ("object_type", "objective"),
             ("Code*", "O1"),
             ("title", "House of cards"),
-            ("admin", "user@example.com"),
+            ("admins", "user@example.com"),
             ("map:facility", "HOUSE-2"),
             ("map:objective", ""),
         ]),
@@ -162,7 +162,7 @@ class TestBasicCsvImport(TestCase):
             ("object_type", "objective"),
             ("Code*", "O2"),
             ("title", "House of the rising sun"),
-            ("admin", "user@example.com"),
+            ("admins", "user@example.com"),
             ("map:facility", "HOUSE-3"),
             ("map:objective", "O1\nO2\nO3"),
         ]),
@@ -170,7 +170,7 @@ class TestBasicCsvImport(TestCase):
             ("object_type", "objective"),
             ("Code*", "O3"),
             ("title", "Yellow house"),
-            ("admin", "user@example.com"),
+            ("admins", "user@example.com"),
             ("map:facility", "HOUSE-4"),
             ("map:objective", ""),
         ]),
@@ -178,7 +178,7 @@ class TestBasicCsvImport(TestCase):
             ("object_type", "objective"),
             ("Code*", "O4"),
             ("title", "There is no place like home"),
-            ("admin", "user@example.com"),
+            ("admins", "user@example.com"),
             ("map:facility", "HOUSE-1"),
             ("map:objective", "O3\nO4\nO3"),
         ]),
@@ -251,7 +251,7 @@ class TestBasicCsvImport(TestCase):
             ("object_type", obj_type),
             ("Code*", "{}-1".format(obj_type.upper())),
             ("Title*", "{}-1".format(obj_type)),
-            ("Admin*", "user@example.com"),
+            ("Admins*", "user@example.com"),
         ]) for obj_type in other_objects
     ]
 
@@ -261,7 +261,7 @@ class TestBasicCsvImport(TestCase):
             ("object_type", check_object),
             ("Code*", "{}-1".format(check_object.upper())),
             ("Title*", "{}-1".format(check_object)),
-            ("Admin*", "user@example.com"),
+            ("Admins*", "user@example.com"),
             ("map:regulation", ""),
             ("map:policy", ""),
             ("map:contract", ""),
@@ -272,7 +272,7 @@ class TestBasicCsvImport(TestCase):
             ("object_type", check_object),
             ("Code*", "{}-2".format(check_object.upper())),
             ("Title*", "{}-2".format(check_object)),
-            ("Admin*", "user@example.com"),
+            ("Admins*", "user@example.com"),
             ("map:regulation", "REGULATION-1"),
             ("map:policy", "POLICY-1"),
             ("map:contract", "CONTRACT-1"),
@@ -520,7 +520,7 @@ class TestImportPermissions(TestCase):
       ).one()
       rbac_factories.UserRoleFactory(role=system_role, person=user)
       audit.add_person_with_role_name(user, "Audit Captains")
-      market.add_person_with_role_name(user, "Admin")
+      market.add_person_with_role_name(user, "Admins")
     self._create_snapshots(audit, [market])
 
     data = [
@@ -558,7 +558,7 @@ class TestImportPermissions(TestCase):
           all_models.Role.name == "Creator"
       ).one()
       rbac_factories.UserRoleFactory(role=system_role, person=user)
-      market.add_person_with_role_name(user, "Admin")
+      market.add_person_with_role_name(user, "Admins")
 
     user_perm_key = 'permissions:{}'.format(user_id)
 
@@ -575,7 +575,7 @@ class TestImportPermissions(TestCase):
         collections.OrderedDict([
             ("Code*", ""),
             ("Title*", "Test Objective"),
-            ("Admin", "user@example.com"),
+            ("Admins", "user@example.com"),
             ("map:market", "test market"),
         ])
     ]

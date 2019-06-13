@@ -7,5 +7,5 @@ import Mixin from '../mixin';
 
 export default Mixin.extend({
   send_by_default: true,
-  recipients: 'Admin,Primary Contacts,Secondary Contacts',
+  recipients: 'Admins,Primary Contacts,Secondary Contacts',
 });
