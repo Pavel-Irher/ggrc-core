@@ -229,7 +229,7 @@ class InfoWidget(WithObjectReview, WithPageElements, base.Widget,
   @property
   def admins(self):
     """Returns Admin page element."""
-    return self._related_people_list("Admin", self._root)
+    return self._related_people_list(roles.ADMINS, self._root)
 
   @property
   def primary_contacts(self):
@@ -810,7 +810,7 @@ class Controls(WithAssignFolder, InfoWidget):
 
   def __init__(self, driver):
     super(Controls, self).__init__(driver)
-    self.admin_text = roles.ADMIN.upper()
+    self.admin_text = roles.ADMINS.upper()
     self.admin_entered_text = self.admins.get_people_emails()
     self.control_operator_text = roles.CONTROL_OPERATORS.upper()
     self.control_operator_entered_text = (
@@ -881,7 +881,7 @@ class OrgGroups(InfoWidget):
 
   def update_obj_scope(self, scope):
     """Updates obj scope."""
-    scope.update(admin=self.admins.get_people_emails())
+    scope.update(admins=self.admins.get_people_emails())
 
 
 class Vendors(InfoWidget):
@@ -993,7 +993,7 @@ class Risks(InfoWidget):
   def update_obj_scope(self, scope):
     """Updates obj scope."""
     scope.update(
-        admin=self.admins.get_people_emails(),
+        admins=self.admins.get_people_emails(),
         risk_type=self.risk_type()
     )
 
