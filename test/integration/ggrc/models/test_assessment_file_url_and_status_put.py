@@ -56,15 +56,18 @@ class TestAssessmentCompleteWithAction(ggrc.TestCase):
   def test_add_evidence_and_status(self, status, result_status):
     """Test add evidence and update {0} status to {1}
     in single PUT."""
-    asmt_id = self.asmt.id
+    with factories.single_commit():
+      asmt = factories.AssessmentFactory()
+      asmt_id = asmt.id
+      self.update_assessment_verifiers(asmt, status)
 
     # putting assessment to 'In Progress' state
-    self.api.put(self.asmt, {
+    self.api.put(asmt, {
         "actions": {"add_related": [{"id": self.evidence.id,
                                      "type": "Evidence"}]},
     })
     new_evidence = factories.EvidenceFactory()
-    response = self.api.put(self.asmt, {
+    response = self.api.put(asmt, {
         "status": status,
         "actions": {"add_related": [{"id": new_evidence.id,
                                      "type": "Evidence"}]},
@@ -84,14 +87,17 @@ class TestAssessmentCompleteWithAction(ggrc.TestCase):
   def test_remove_evidence_and_status(self, status, result_status):
     """Test remove evidence and update {0} status to {1}
     in single PUT."""
-    asmt_id = self.asmt.id
+    with factories.single_commit():
+      asmt = factories.AssessmentFactory()
+      asmt_id = asmt.id
+      self.update_assessment_verifiers(asmt, status)
 
     # putting assessment to 'In Progress' state
-    self.api.put(self.asmt, {
+    self.api.put(asmt, {
         "actions": {"add_related": [{"id": self.evidence.id,
                                      "type": "Evidence"}]},
     })
-    response = self.api.put(self.asmt, {
+    response = self.api.put(asmt, {
         "status": status,
         "actions": {"remove_related": [{"id": self.evidence.id,
                                         "type": "Evidence"}]},
@@ -103,17 +109,50 @@ class TestAssessmentCompleteWithAction(ggrc.TestCase):
     asmt = all_models.Assessment.query.get(asmt_id)
     self.assertEqual(asmt.status, result_status)
 
-  @ddt.data("In Review", "Verified", "Completed")
+  @ddt.data("Verified", "Completed")
   def test_remove_required_evidence(self, status):
-    """Test remove mandatory evidence and update
-    status to {0} in single PUT. Result status
-    should be `In Progress`"""
+    """Test remove mandatory evidence and update status to {0} in single PUT.
+
+    Result status should be `In Progress`"""
     asmt_id = self.asmt.id
     self._prepare_mandatory_evidence_cad()
     rel = factories.RelationshipFactory(
         source=self.asmt,
         destination=self.evidence,
     )
+    rel_id = rel.id
+    response = self.api.put(self.asmt, {
+        "status": status,
+        "actions": {"remove_related": [{"id": self.evidence.id,
+                                        "type": "Evidence"}]},
+    })
+    self.assertEqual(response.status_code, 400)
+    message = response.json["message"]
+    self.assertEqual(message, "CA-introduced completion preconditions "
+                              "are not satisfied. Check preconditions_failed"
+                              " of items of self.custom_attribute_values")
+    asmnt = all_models.Assessment.query.filter_by(id=asmt_id).first()
+    self.assertEqual(asmnt.status, "In Progress")
+
+    relationship = all_models.Relationship.query.get(rel_id)
+    self.assertIsNotNone(relationship)
+
+  def test_remove_required_evidence_verifiers_assessment(self):
+    """Test remove mandatory evidence and update status to In review in one PUT
+
+    Result status should be `In Progress`"""
+    # pylint: disable=invalid-name
+
+    status = "In Review"
+    asmt_id = self.asmt.id
+    self._prepare_mandatory_evidence_cad()
+    rel = factories.RelationshipFactory(
+        source=self.asmt,
+        destination=self.evidence,
+    )
+    with factories.single_commit():
+      person = factories.PersonFactory()
+      self.asmt.add_person_with_role_name(person, "Verifiers")
     rel_id = rel.id
     response = self.api.put(self.asmt, {
         "status": status,

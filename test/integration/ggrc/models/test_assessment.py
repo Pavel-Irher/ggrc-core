@@ -13,6 +13,7 @@ import mock
 from ggrc import db
 from ggrc.models import all_models
 from ggrc.converters import errors
+from ggrc.utils import errors as ggrc_errors
 
 from integration import ggrc
 from integration.ggrc import generator
@@ -145,6 +146,21 @@ class TestAssessment(TestAssessmentBase):
     for role in self.assignee_roles:
       self.assert_mapped_role(role, person_email, assessment)
       self.assert_propagated_role("{}".format(role), person_email, audit)
+
+  def test_post_missing_verifiers(self):
+    """Test post assessment missing verifiers to 'Verified' state"""
+    response = self.api.post(all_models.Assessment, {
+        "assessment": {
+            "audit": {
+                "id": factories.AuditFactory().id,
+                "type": "Audit"
+            },
+            "access_control_list": [],
+            "title": "Some title",
+            "status": "Verified",
+        }
+    })
+    self.assertEqual(response.status_code, 400)
 
   def test_put_mapped_roles(self):
     """Test mapped roles creation when assessment updated"""
@@ -430,6 +446,49 @@ class TestAssessment(TestAssessmentBase):
 
 
 @ddt.ddt
+class TestAssessmentStatus(TestAssessmentBase):
+  """Test change assessment status"""
+
+  def setUp(self):
+    super(TestAssessmentStatus, self).setUp()
+    with factories.single_commit():
+      person = factories.PersonFactory()
+      assessment = factories.AssessmentFactory()
+      assessment.add_person_with_role_name(person, "Creators")
+    self.assessment = assessment
+    self.assessment_id = assessment.id
+    self.person = person
+    self.person_id = person.id
+    self.initial_state = assessment.status
+
+  def test_complete_invalid(self):
+    """Test complete not verified assessment with existing verifiers"""
+    with factories.single_commit():
+      self.assessment.add_person_with_role_name(self.person, "Verifiers")
+    response = self.api.put(self.assessment, {"status": "Completed"})
+    self.assert400(response)
+    self.assertEqual(
+        response.json['message'],
+        ggrc_errors.NO_COMPLETE_WITH_VERIFIERS
+    )
+    assessment = all_models.Assessment.query.get(self.assessment_id)
+    self.assertEqual(assessment.verified, False)
+    self.assertEqual(assessment.status, self.initial_state)
+
+  @ddt.data("In Review", "Verified", "Rework Needed")
+  def test_missing_verifiers_status(self, new_status):
+    """Test 400 while change assessment status to {} with missing verifiers"""
+    response = self.api.put(self.assessment, {"status": new_status})
+    self.assert400(response)
+    self.assertEqual(
+        response.json['message'],
+        ggrc_errors.MISSING_ASSESSMENT_VERIFIERS
+    )
+    assessment = all_models.Assessment.query.get(self.assessment_id)
+    self.assertEqual(assessment.status, self.initial_state)
+
+
+@ddt.ddt
 @base.with_memcache
 class TestAssessmentUpdates(ggrc.TestCase):
   """ Test various actions on Assessment updates """
@@ -486,12 +545,13 @@ class TestAssessmentUpdates(ggrc.TestCase):
   def test_update_assessment_and_get_list(self):
     """Test get value for assessment cached value after update."""
     old_state = "In Progress"
-    all_models.Assessment.query.filter(
-        all_models.Assessment.id == self.assessment_id
-    ).update({
-        all_models.Assessment.status: old_state,
-    })
-    db.session.commit()
+    new_state = "In Review"
+    with factories.single_commit():
+      asmt = all_models.Assessment.query.filter(
+          all_models.Assessment.id == self.assessment_id
+      ).first()
+      asmt.status = old_state
+      self.update_assessment_verifiers(asmt, new_state)
     # required for populate cache
     content = self.api.client.get(
         "/api/assessments?id__in={}".format(self.assessment_id)
@@ -500,7 +560,6 @@ class TestAssessmentUpdates(ggrc.TestCase):
         old_state,
         content.json['assessments_collection']['assessments'][0]['status']
     )
-    new_state = "In Review"
     self.api.put(all_models.Assessment.query.get(self.assessment_id),
                  {"status": new_state})
     content = self.api.client.get(

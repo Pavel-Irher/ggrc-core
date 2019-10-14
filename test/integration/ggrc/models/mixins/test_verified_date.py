@@ -18,17 +18,21 @@ class TestVerifiedDate(TestCase):
   def setUp(self):
     super(TestVerifiedDate, self).setUp()
     self.api_helper = api_helper.Api()
-    self.assessment = factories.AssessmentFactory(
-        status=Assessment.PROGRESS_STATE,
-    )
 
   def test_validates_with_no_mandatory_ca(self):
     """Test verified date and verified flag are reset on Undo."""
-    response = self.api_helper.modify_object(self.assessment, {
+    with factories.single_commit():
+      person = factories.PersonFactory()
+      assessment = factories.AssessmentFactory(
+          status=Assessment.PROGRESS_STATE,
+      )
+      assessment.add_person_with_role_name(person, "Verifiers")
+
+    response = self.api_helper.modify_object(assessment, {
         "status": "Verified",
     })
     self.assertEqual(response.json["assessment"]["verified"], True)
-    response = self.api_helper.modify_object(self.assessment, {
+    response = self.api_helper.modify_object(assessment, {
         "status": "In Review",
     })
     self.assertEqual(response.json["assessment"]["verified"], False)

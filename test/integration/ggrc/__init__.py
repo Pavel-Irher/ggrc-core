@@ -639,6 +639,16 @@ class TestCase(BaseTestCase, object):
     return assignees
 
   @staticmethod
+  def update_assessment_verifiers(assessment, status, person=None):
+    """Update assessment verifiers list if status requires"""
+    if status in assessment.VERIFIERS_REQUIRED:
+      assessment.add_person_with_role_name(
+          person if person else factories.PersonFactory(),
+          "Verifiers"
+      )
+    return assessment
+
+  @staticmethod
   def create_user_with_role(role, **person_params):
     """Create new user and assign global role to him."""
     with factories.single_commit():

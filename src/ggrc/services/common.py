@@ -662,8 +662,9 @@ class Resource(ModelView):
       self._validate_readonly_access(obj, src)
 
   @utils.validate_mimetype("application/json")
-  def put(self, id):  # pylint: disable=redefined-builtin
+  def put(self, id):
     """PUT operation handler."""
+    # pylint: disable=redefined-builtin,too-many-statements
     with benchmark("Query for object"):
       obj = self.get_object(id)
     if obj is None:

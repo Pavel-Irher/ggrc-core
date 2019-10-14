@@ -40,7 +40,10 @@ class TestAssessmentComplete(ggrc.TestCase):
 
   def test_put_cad_and_status(self):
     """Test update mandatory cad and status in single PUT."""
-    asmt_id = self.asmt.id
+    with factories.single_commit():
+      asmt = factories.AssessmentFactory()
+      asmt_id = asmt.id
+      self.update_assessment_verifiers(asmt, "In Review")
     assessment_data = {
         "status": "In Review",
         "custom_attribute_values": [{
@@ -48,7 +51,7 @@ class TestAssessmentComplete(ggrc.TestCase):
             "attribute_value": "test",
         }],
     }
-    response = self.api.put(self.asmt, assessment_data)
+    response = self.api.put(asmt, assessment_data)
     self._validate_response(response, 200, "In Review", "test")
 
     asmt = all_models.Assessment.query.get(asmt_id)
@@ -57,6 +60,9 @@ class TestAssessmentComplete(ggrc.TestCase):
 
   def test_put_cad_and_status_empty(self):
     """Test update empty mandatory cad and status in single PUT."""
+    with factories.single_commit():
+      person = factories.PersonFactory()
+      self.asmt.add_person_with_role_name(person, "Verifiers")
     asmt_id = self.asmt.id
     assessment_data = {
         "status": "In Review",

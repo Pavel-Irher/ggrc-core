@@ -799,17 +799,17 @@ class TestIssueTrackerIntegration(SnapshotterBaseTestCase):
   @ddt.data(
       ('Completed', 'VERIFIED'),
       ('In Progress', 'ASSIGNED'),
-      ('Rework Needed', 'ASSIGNED'),
       ('Deprecated', 'OBSOLETE'),
-      ('In Review', 'FIXED'),
   )
   @ddt.unpack
   @mock.patch('ggrc.integrations.issues.Client.create_issue')
   @mock.patch.object(settings, "ISSUE_TRACKER_ENABLED", True)
-  def test_complete_assessment_create_issue(self,
-                                            assmt_status,
-                                            expected_status,
-                                            mock_create_issue):
+  def test_complete_assessment_create_issue(
+      self,
+      assmt_status,
+      expected_status,
+      mock_create_issue
+  ):
     """Test the creation of ticket for assessment in {0} state."""
     audit = factories.AuditFactory()
     # self._create_assessment_via_api(audit, assmt_status)
@@ -845,6 +845,63 @@ class TestIssueTrackerIntegration(SnapshotterBaseTestCase):
       mock_create_issue.assert_called_once()
       self.assertEqual(mock_create_issue.call_args[0][0]['status'],
                        expected_status)
+
+  @ddt.data(
+      ('Rework Needed', 'ASSIGNED'),
+      ('In Review', 'FIXED'),
+  )
+  @ddt.unpack
+  @mock.patch('ggrc.integrations.issues.Client.create_issue')
+  @mock.patch.object(settings, "ISSUE_TRACKER_ENABLED", True)
+  def test_with_verifiers_assessment_create_issue(
+      self,
+      assmt_status,
+      expected_status,
+      mock_create_issue
+  ):
+    """Test the creation of ticket for assessment in {0} state."""
+    audit = factories.AuditFactory()
+    role_id = all_models.AccessControlRole.query.filter(
+        all_models.AccessControlRole.object_type == "Assessment",
+        all_models.AccessControlRole.name == "Verifiers"
+    ).first().id
+    response = self.api.post(all_models.Assessment, {
+        'assessment': {
+            'title': 'Assessment1',
+            'context': None,
+            'audit': {
+                'id': audit.id,
+                'type': audit.type,
+            },
+            "access_control_list": [
+                acl_helper.get_acl_json(role_id, factories.PersonFactory().id),
+            ],
+            'status': assmt_status,
+        }
+    })
+    self.assert201(response)
+    asmt = all_models.Assessment.query.one()
+
+    with mock.patch.object(
+        assessment_integration.AssessmentTrackerHandler,
+        '_is_tracker_enabled',
+        return_value=True
+    ):
+      issue_params = {
+          'enabled': True,
+          'component_id': 123123,
+          'hotlist_id': 123123,
+          'issue_type': 'PROCESS',
+          'issue_priority': 'P2',
+          'issue_severity': 'S2',
+          'title': 'Default Title'
+      }
+      self.api.put(asmt, {'issue_tracker': issue_params})
+      mock_create_issue.assert_called_once()
+      self.assertEqual(
+          mock_create_issue.call_args[0][0]['status'],
+          expected_status
+      )
 
   @mock.patch.object(settings, "ISSUE_TRACKER_ENABLED", True)
   def test_update_issuetracker_info(self):
@@ -1064,77 +1121,6 @@ class TestIssueTrackerIntegration(SnapshotterBaseTestCase):
 
       issue = db.session.query(models.IssuetrackerIssue).get(iti.id)
       self.assertEqual(issue.due_date.strftime("%Y-%m-%d"), new_due_date)
-
-  # pylint: disable=protected-access
-  # pylint: disable=too-many-locals
-  @ddt.data(
-      ('Not Started', {
-          'status': 'ASSIGNED'
-      }),
-      ('In Progress', {
-          'status': 'ACCEPTED'
-      }),
-      ('In Review', {
-          'status': 'FIXED'
-      }),
-      ('Rework Needed', {
-          'status': 'ACCEPTED'
-      }),
-      ('Completed', {
-          'status': 'VERIFIED',
-          'comment': constants.STATUS_CHANGE_TMPL
-      }),
-      ('Deprecated', {
-          'status': 'OBSOLETE',
-          'comment': constants.STATUS_CHANGE_TMPL
-      }),
-  )
-  @ddt.unpack
-  @mock.patch('ggrc.integrations.issues.Client.update_issue')
-  @mock.patch.object(settings, "ISSUE_TRACKER_ENABLED", True)
-  def test_change_assessment_status(self, status,
-                                    additional_kwargs,
-                                    mocked_update_issue):
-    """Issue status should be changed for assessment with {status} status."""
-    iti_issue_id = []
-    iti = factories.IssueTrackerIssueFactory(
-        enabled=True,
-        component_id="123123",
-        issue_type="PROCESS",
-        issue_priority="P2",
-        issue_severity="S2"
-    )
-    iti_issue_id.append(iti.issue_id)
-    asmt = iti.issue_tracked_obj
-    tracker_handler = assessment_integration.AssessmentTrackerHandler()
-    with mock.patch.object(
-        assessment_integration.AssessmentTrackerHandler,
-        '_is_tracker_enabled',
-        return_value=True
-    ):
-      self.api.put(
-          asmt,
-          {
-              "status": status,
-          },
-      )
-      kwargs = {'component_id': 123123,
-                'severity': "S2",
-                'title': iti.title,
-                'hotlist_ids': [],
-                'priority': "P2"}
-      asmt_link = tracker_handler._get_assessment_page_url(asmt)
-      if 'comment' in additional_kwargs:
-        try:
-          additional_kwargs['comment'] = \
-              additional_kwargs['comment'] % (status, asmt_link)
-        except TypeError:
-          pass
-      kwargs.update(additional_kwargs)
-      mocked_update_issue.assert_called_once_with(iti_issue_id[0], kwargs)
-
-      issue = db.session.query(models.IssuetrackerIssue).get(iti.id)
-      self.assertEqual(issue.cc_list, "")
 
   @staticmethod
   def _prepare_acl(configurations):
@@ -1435,6 +1421,117 @@ class TestIssueTrackerIntegration(SnapshotterBaseTestCase):
                   response.json.get(
                       "assessment", {}).get("issue_tracker",
                                             {}).get("_warnings", []))
+
+
+@ddt.ddt
+@mock.patch.object(settings, "ISSUE_TRACKER_ENABLED", True)
+class TestIntegrationAssessmentStatus(SnapshotterBaseTestCase):
+  """Test issue status should be changes"""
+  # pylint: disable=protected-access,invalid-name
+
+  def setUp(self):
+    super(TestIntegrationAssessmentStatus, self).setUp()
+    self.iti_issue_id = []
+    with factories.single_commit():
+      self.iti = factories.IssueTrackerIssueFactory(
+          enabled=True,
+          component_id="123123",
+          issue_type="PROCESS",
+          issue_priority="P2",
+          issue_severity="S2"
+      )
+      self.iti_id = self.iti.id
+      self.iti_issue_id.append(str(self.iti.issue_id))
+      self.asmt = self.iti.issue_tracked_obj
+      self.asmt_id = self.asmt.id
+      self.tracker_handler = assessment_integration.AssessmentTrackerHandler()
+
+  @ddt.data(
+      ('Not Started', {
+          'status': 'ASSIGNED'
+      }),
+      ('In Progress', {
+          'status': 'ACCEPTED'
+      }),
+      ('Completed', {
+          'status': 'VERIFIED',
+          'comment': constants.STATUS_CHANGE_TMPL
+      }),
+      ('Deprecated', {
+          'status': 'OBSOLETE',
+          'comment': constants.STATUS_CHANGE_TMPL
+      }),
+  )
+  @ddt.unpack
+  @mock.patch('ggrc.integrations.issues.Client.update_issue')
+  def test_change_assessment_status(self, status,
+                                    additional_kwargs,
+                                    mocked_update_issue):
+    """Issue status should be changed for assessment with {0} status."""
+    with mock.patch.object(
+        assessment_integration.AssessmentTrackerHandler,
+        '_is_tracker_enabled',
+        return_value=True
+    ):
+      self.api.put(self.asmt, {"status": status})
+      self._test_change_assessment_status(
+          status,
+          additional_kwargs,
+          mocked_update_issue,
+      )
+
+  @ddt.data(
+      ('In Review', {
+          'status': 'FIXED'
+      }),
+      ('Rework Needed', {
+          'status': 'ACCEPTED'
+      }),
+  )
+  @ddt.unpack
+  @mock.patch('ggrc.integrations.issues.Client.update_issue')
+  def test_change_assessment_status_need_verifiers(self, status,
+                                                   additional_kwargs,
+                                                   mocked_update_issue):
+    """Issue status should be changed verified assessment with {0} status"""
+    with factories.single_commit():
+      person = factories.PersonFactory()
+      self.asmt.add_person_with_role_name(person, "Verifiers")
+    with mock.patch.object(
+        assessment_integration.AssessmentTrackerHandler,
+        '_is_tracker_enabled',
+        return_value=True
+    ):
+      self.api.put(self.asmt, {"status": status})
+      self._test_change_assessment_status(
+          status,
+          additional_kwargs,
+          mocked_update_issue,
+      )
+
+  def _test_change_assessment_status(self, status,
+                                     additional_kwargs,
+                                     mocked_update_issue):
+    """Test ability change assessment status"""
+    iti = db.session.query(models.IssuetrackerIssue).get(
+        self.iti_id)
+    kwargs = {'component_id': 123123,
+              'severity': "S2",
+              'title': iti.title,
+              'hotlist_ids': [],
+              'priority': "P2"}
+    asmt_link = self.tracker_handler._get_assessment_page_url(self.asmt)
+    if 'comment' in additional_kwargs:
+      try:
+        additional_kwargs['comment'] = \
+            additional_kwargs['comment'] % (status, asmt_link)
+      except TypeError:
+        pass
+    kwargs.update(additional_kwargs)
+    mocked_update_issue.assert_called_once_with(self.iti_issue_id[0], kwargs)
+
+    issue = db.session.query(models.IssuetrackerIssue).get(iti.id)
+    self.assertEqual(issue.cc_list, "")
 
 
 @mock.patch('ggrc.models.hooks.issue_tracker.'

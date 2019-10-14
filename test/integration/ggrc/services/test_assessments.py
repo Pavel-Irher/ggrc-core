@@ -71,26 +71,63 @@ class TestCollection(TestCase, WithQueryApi):
     self.assertTrue(all_models.Assessment.query.filter(
         all_models.Assessment.id == assessment_id).one())
 
+
+@ddt.ddt
+class TestAssessmentChangeState(TestCase, WithQueryApi):
+  """Test change assessment state"""
+  # pylint: disable=invalid-name
+
+  def setUp(self):
+    super(TestAssessmentChangeState, self).setUp()
+    self.client.get("/login")
+    self.clear_data()
+    self.api = Api()
+    self.generator = ObjectGenerator()
+
   @ddt.data(
-      (all_models.Assessment.REWORK_NEEDED, True),
-      (all_models.Assessment.DONE_STATE, True),
-      (all_models.Assessment.FINAL_STATE, True),
-      (all_models.Assessment.START_STATE, False),
+      all_models.Assessment.REWORK_NEEDED,
+      all_models.Assessment.FINAL_STATE,
   )
-  @ddt.unpack
-  def test_update_status_need_rework(self, status, is_valid):
-    """Update assessment state from need rework to valid or invalid states."""
+  def test_update_status_need_rework(self, status):
+    """Test update assessment state from need rework to valid"""
     with factories.single_commit():
       assessment = factories.AssessmentFactory(
-          status=all_models.Assessment.REWORK_NEEDED
+          status=all_models.Assessment.REWORK_NEEDED,
       )
     assessment_id = assessment.id
     resp = self.api.put(assessment, {"status": status})
-    if is_valid:
-      self.assert200(resp)
-      check_status = status
-    else:
-      self.assert400(resp)
-      check_status = all_models.Assessment.REWORK_NEEDED
+    self.assert200(resp)
     self.assertEqual(
-        check_status, all_models.Assessment.query.get(assessment_id).status)
+        status, all_models.Assessment.query.get(assessment_id).status)
+
+  def test_update_status_need_rework_with_verifiers(self):
+    """Test update assessment state where verifiers required"""
+    expected_status = all_models.Assessment.DONE_STATE
+    with factories.single_commit():
+      assessment = factories.AssessmentFactory(
+          status=all_models.Assessment.REWORK_NEEDED,
+      )
+      assessment.add_person_with_role_name(
+          factories.PersonFactory(), "Verifiers"
+      )
+    assessment_id = assessment.id
+    resp = self.api.put(assessment, {"status": expected_status})
+    self.assert200(resp)
+    self.assertEqual(
+        expected_status, all_models.Assessment.query.get(assessment_id).status)
+
+  def test_no_update_status_need_rework(self):
+    """Test can't update assessment state to start state"""
+    with factories.single_commit():
+      assessment = factories.AssessmentFactory(
+          status=all_models.Assessment.REWORK_NEEDED,
+      )
+    assessment_id = assessment.id
+    resp = self.api.put(
+        assessment,
+        {"status": all_models.Assessment.START_STATE}
+    )
+    self.assert400(resp)
+    expected_status = all_models.Assessment.REWORK_NEEDED
+    self.assertEqual(
+        expected_status, all_models.Assessment.query.get(assessment_id).status)

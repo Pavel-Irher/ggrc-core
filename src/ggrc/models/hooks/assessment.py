@@ -46,11 +46,7 @@ def _validate_assessment_state(old_value, obj):
                                   "preconditions are not satisfied. "
                                   "Check preconditions_failed "
                                   "of items of self.custom_attribute_values")
-  if (obj.status == obj.FINAL_STATE and
-     not obj.verified and
-     not getattr(obj, 'sox_302_enabled', False) and
-     getattr(obj, 'verifiers', [])):
-    obj.status = obj.DONE_STATE
+  obj.validate_done_state(old_value)
 
 
 def _get_audit_id(asmt_src):
@@ -157,7 +153,7 @@ def _handle_assessment(assessment,  # type: models.Assessment
   set_assessment_type(assessment, tmpl)
 
 
-def init_hook():
+def init_hook():  # noqa: ignore=C901
   """Initializes hooks."""
 
   # pylint: disable=unused-variable
@@ -178,6 +174,11 @@ def init_hook():
 
     audit, template = None, None
     for assessment, src in itertools.izip(objects, sources):
+      try:
+        assessment.validate_done_state(assessment.START_STATE)
+      except StatusValidationError as error:
+        db.session.rollback()
+        raise error
       audit = _get_object_from_src(
           src, _get_audit_id, all_models.Audit, current=audit)
 

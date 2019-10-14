@@ -6,7 +6,7 @@ import datetime
 
 import ddt
 
-from ggrc import models, db
+from ggrc import models
 from ggrc.access_control.role import get_custom_roles_for
 from integration.ggrc import generator
 from integration.ggrc.access_control import acl_helper
@@ -299,6 +299,7 @@ class TestSnapshots(TestMixinAutoStatusChangeableBase):
       assessment = factories.AssessmentFactory(audit=audit)
       factories.RelationshipFactory(source=audit, destination=assessment)
       control = factories.ControlFactory(title='test control')
+      self.update_assessment_verifiers(assessment, from_status)
 
     assessment_id = assessment.id
     snapshot = self._create_snapshots(audit, [control])[0]
@@ -368,6 +369,7 @@ class TestSnapshots(TestMixinAutoStatusChangeableBase):
                                                assessment_type='Contract')
       factories.RelationshipFactory(source=audit, destination=assessment)
       control = factories.ControlFactory(title='test control')
+      self.update_assessment_verifiers(assessment, from_status)
     assessment_id = assessment.id
     snapshot = self._create_snapshots(audit, [control])[0]
     response, relationship = self.objgen.generate_relationship(
@@ -468,6 +470,7 @@ class TestCustomAttributes(TestMixinAutoStatusChangeableBase):
                        attribute_type='Rich Text'
                        )
       assessment = factories.AssessmentFactory()
+      self.update_assessment_verifiers(assessment, from_status)
     self.api.modify_object(assessment, {
         'custom_attribute_values': [{
             'custom_attribute_id': gca.id,
@@ -580,20 +583,6 @@ class TestOther(TestMixinAutoStatusChangeableBase):
     assessment = self.refresh_object(assessment)
     self.assertEqual(from_status, assessment.status)
 
-  @ddt.data(models.Assessment.FINAL_STATE)
-  def test_status_change_when_verifier_exists(self, new_status):
-    """Assessment with Verifiers should update Status to In Review if we are
-    trying to set {0} state"""
-    with factories.single_commit():
-      assessment = factories.AssessmentFactory()
-      person = factories.PersonFactory()
-
-    self.modify_assignee(assessment, person.email, ["Verifiers"])
-    assessment = self.refresh_object(assessment)
-
-    self.change_status(assessment, new_status,
-                       expected_status=models.Assessment.DONE_STATE)
-
   @ddt.data(models.Assessment.DONE_STATE,
             models.Assessment.FINAL_STATE,
             models.Assessment.PROGRESS_STATE,
@@ -630,6 +619,7 @@ class TestOther(TestMixinAutoStatusChangeableBase):
       assessment = factories.AssessmentFactory(audit=audit)
       factories.RelationshipFactory(source=audit, destination=assessment)
       issue = factories.IssueFactory(title='test Issue')
+      self.update_assessment_verifiers(assessment, from_status)
     assessment_id = assessment.id
     response, relationship = self.objgen.generate_relationship(
         source=assessment,
@@ -657,6 +647,7 @@ class TestOther(TestMixinAutoStatusChangeableBase):
       assessment = factories.AssessmentFactory(audit=audit)
       factories.RelationshipFactory(source=audit, destination=assessment)
       issue = factories.IssueFactory(title='test Issue')
+      self.update_assessment_verifiers(assessment, from_status)
     assessment_id = assessment.id
     self.objgen.generate_relationship(
         source=assessment,
@@ -675,45 +666,21 @@ class TestOther(TestMixinAutoStatusChangeableBase):
   @ddt.data(
       (
           "Creators",
-          models.Assessment.FINAL_STATE,
-          models.Assessment.PROGRESS_STATE,
-          {}
-      ),
-      (
-          "Creators",
           models.Assessment.DONE_STATE,
-          models.Assessment.PROGRESS_STATE,
-          {}
-      ),
-      (
-          "Assignees",
-          models.Assessment.FINAL_STATE,
-          models.Assessment.PROGRESS_STATE,
-          {}
-      ),
-      (
-          "Assignees",
-          models.Assessment.DONE_STATE,
-          models.Assessment.PROGRESS_STATE,
-          {}
-      ),
-      (
-          "Verifiers",
-          models.Assessment.FINAL_STATE,
           models.Assessment.PROGRESS_STATE,
           {"verified_date": datetime.datetime.utcnow()}
       ),
       (
-          "Verifiers",
+          "Assignees",
           models.Assessment.DONE_STATE,
           models.Assessment.PROGRESS_STATE,
           {}
       ),
   )
   @ddt.unpack
-  def test_change_acl_status_sw(self, acr_name, start_state, end_state,
-                                extra_setup_args):
-    """Change in ACL switches status from `start_state` to `end_state`."""
+  def test_change_acl_status_verifiers(self, acr_name, start_state, end_state,
+                                       extra_setup_args):
+    """Test change ACL switches status verifiers required"""
     with factories.single_commit():
       assessment = factories.AssessmentFactory(status=start_state)
       person = factories.PersonFactory()
@@ -722,13 +689,56 @@ class TestOther(TestMixinAutoStatusChangeableBase):
     assessment = self.refresh_object(assessment)
     self.assertEqual(assessment.status, end_state)
 
-    for attr_name, value in extra_setup_args.items():
-      setattr(assessment, attr_name, value)
-    db.session.commit()
+    with factories.single_commit():
+      for attr_name, value in extra_setup_args.items():
+        setattr(assessment, attr_name, value)
+      assessment.add_person_with_role_name(person, "Verifiers")
     assessment = self.change_status(assessment, start_state)
     self.modify_assignee(assessment, person.email, [])
     assessment = self.refresh_object(assessment)
     self.assertEqual(assessment.status, end_state)
+
+  def test_change_acl_status_sw_verifiers(self):
+    """Test switches status from `start_state` to `end_state` with verifiers"""
+    start_state = models.Assessment.FINAL_STATE
+    end_state = models.Assessment.PROGRESS_STATE
+    with factories.single_commit():
+      assessment = factories.AssessmentFactory(status=start_state)
+      person = factories.PersonFactory()
+
+    self.modify_assignee(assessment, person.email, ["Verifiers"])
+    assessment = self.refresh_object(assessment)
+    self.assertEqual(assessment.status, end_state)
+
+    assessment = self.change_status(
+        assessment,
+        models.Assessment.VERIFIED_STATE,
+        start_state,
+        check_verified=True
+    )
+    self.modify_assignee(assessment, person.email, [])
+    assessment = self.refresh_object(assessment)
+    self.assertEqual(assessment.status, end_state)
+
+  def test_change_status_and_verifiers(self):
+    """Test change assessment verifiers and status to verified"""
+    start_state = models.Assessment.FINAL_STATE
+    end_state = models.Assessment.PROGRESS_STATE
+    with factories.single_commit():
+      assessment = factories.AssessmentFactory(status=start_state)
+      person = factories.PersonFactory()
+
+    self.modify_assignee(assessment, person.email, ["Verifiers"])
+    assessment = self.refresh_object(assessment)
+    self.assertEqual(assessment.status, end_state)
+
+    self.api.modify_object(assessment, {
+        "status": models.Assessment.VERIFIED_STATE,
+        "access_control_list": []
+    })
+    assessment = self.refresh_object(assessment)
+    self.assertEqual(assessment.status, end_state)
+    self.assertEqual(assessment.verifiers, [])
 
   @ddt.data(
       ("Creators", models.Assessment.START_STATE),

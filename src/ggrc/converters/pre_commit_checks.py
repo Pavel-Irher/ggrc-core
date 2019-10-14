@@ -141,6 +141,11 @@ def secondary_check_assessment(row_converter):
       row_converter.add_error_slug()
       row_converter.add_warning(errors.NO_REQUIRED_ANSWERS_WARNING)
       obj.status = old_value or obj.default_status()
+  if (row_converter.obj.status == row_converter.obj.FINAL_STATE and
+     not row_converter.obj.verified and
+     not getattr(row_converter.obj, 'sox_302_enabled', False) and
+     getattr(row_converter.obj, 'verifiers', [])):
+    row_converter.obj.status = row_converter.obj.PROGRESS_STATE
 
 
 def check_assessment_template(row_converter):

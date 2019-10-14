@@ -117,7 +117,6 @@ class TestAsmtRolesPropagation(base.TestACLPropagation):
                   "complete": True,
                   "in_progress": True,
                   "not_started": True,
-                  "decline": (False, "unimplemented"),
                   "verify": (False, "unimplemented"),
                   "map_comment": True,
                   "map_evidence": True,
@@ -302,3 +301,40 @@ class TestAsmtRolesPropagation(base.TestACLPropagation):
   def test_access(self, role, model, acr_name, action_name, expected_result):
     """{0:<7}: On {1:<20} as {2:<9} test {3:<20} - Expected {4:<2} """
     self.runtest(role, model, action_name, expected_result, acr_name=acr_name)
+
+  @helpers.unwrap({
+      "Creator": {
+          "complete": {
+            "Assignees": True,
+            "Creators": True,
+            "Verifiers": (False, "unimplemented"),
+          },
+      },
+      "Reader": {
+          "complete": {
+              "Assignees": True,
+              "Creators": True,
+              "Verifiers": (False, "unimplemented"),
+          },
+          "decline": {
+              "Assignees": (False, "unimplemented"),
+              "Creators": (False, "unimplemented"),
+              "Verifiers": True,
+          },
+      },
+      "Editor": {
+          "complete": {
+              "Assignees": True,
+              "Creators": True,
+              "Verifiers": (False, "unimplemented"),
+          },
+      },
+  }, unwrap_keys=True)
+  def test_access_verified_related(self, role, action_name,
+                                   acr_name, expected_result):
+    """{0:<7}: On Assessment as {2:<9} test {1:<20} - Expected {4:<2} """
+    model_name = "Assessment"
+    rbac_factory = self.init_factory(role, model_name, None, acr_name=acr_name)
+    action = getattr(rbac_factory, action_name, None)
+    response = action()
+    self.assert_result(response, expected_result, action_name, model_name)

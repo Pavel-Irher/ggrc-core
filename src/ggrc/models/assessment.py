@@ -10,9 +10,11 @@ import sqlalchemy as sa
 
 from ggrc import db
 from ggrc import utils
+from ggrc.utils import errors
 from ggrc.builder import simple_property
 from ggrc.fulltext import mixin
 from ggrc.models.comment import Commentable
+from ggrc.models import exceptions as model_exceptions
 from ggrc.models import audit
 from ggrc.models import custom_attribute_definition
 from ggrc.models.mixins import with_last_comment
@@ -84,6 +86,9 @@ class Assessment(Assignable,
   NOT_DONE_STATES = statusable.Statusable.NOT_DONE_STATES | {REWORK_NEEDED, }
   VALID_STATES = tuple(NOT_DONE_STATES | statusable.Statusable.DONE_STATES |
                        statusable.Statusable.INACTIVE_STATES)
+  VERIFIERS_NOT_REQUIRED = {statusable.Statusable.FINAL_STATE, }
+  VERIFIERS_REQUIRED = {REWORK_NEEDED, statusable.Statusable.VERIFIED_STATE,
+                        statusable.Statusable.DONE_STATE}
 
   REMINDERABLE_HANDLERS = {
       "statusToPerson": {
@@ -355,6 +360,30 @@ class Assessment(Assignable,
                            "state can be only moved to: [{}]".format(
                                ",".join(valid_states)))
     return value
+
+  def validate_done_state(self, old_value):
+    """Validate ability to change assessment state
+
+    Args:
+      old_value: old assessment state
+    """
+    new_value = self.status
+    if new_value == old_value:
+      return None
+    if self.verifiers and new_value in self.VERIFIERS_NOT_REQUIRED \
+       and not self.verified and not self.sox_302_enabled:
+      raise model_exceptions.StatusValidationError(
+          errors.NO_COMPLETE_WITH_VERIFIERS
+      )
+    if not self.verifiers and new_value in self.VERIFIERS_REQUIRED:
+      raise model_exceptions.StatusValidationError(
+          errors.MISSING_ASSESSMENT_VERIFIERS
+      )
+    if not self.verifiers and self.verified:
+      raise model_exceptions.StatusValidationError(
+          errors.MISSING_ASSESSMENT_VERIFIERS
+      )
+    return None
 
   @validates("operationally")
   def validate_opperationally(self, key, value):
