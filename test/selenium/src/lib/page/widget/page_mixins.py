@@ -5,6 +5,7 @@
 
 from lib import base
 from lib.element import page_elements
+from lib.page.modal import bulk_update
 from lib.utils import selenium_utils
 
 
@@ -182,3 +183,59 @@ class WithDisabledVersionHistory(base.WithBrowser):
   def click_version_history(self):
     """Click 'Version History' link or tab."""
     self._browser.element(text=self.version_history_tab_or_link_name).click()
+
+
+class WithBulkUpdate(base.WithBrowser):
+  """Contains bulk update elements."""
+
+  @property
+  def bulk_update_finalized_msg(self):
+    """Returns floating message that appears after bulk update process is
+    completed successfully."""
+    return self._browser.element(text="Bulk update is finished successfully.")
+
+  @property
+  def bulk_update_submitted_msg(self):
+    """Returns floating message that appears after bulk update process is
+    started."""
+    return self._browser.element(
+        text="Your bulk update is submitted. Once it is done you will get a "
+        "notification. You can continue working with the app.")
+
+
+class WithBulkUpdateButtons(WithBulkUpdate):
+  """Contains bulk update elements presented as buttons on page."""
+
+  @property
+  def bulk_complete_button(self):
+    """Represents 'Bulk complete' button."""
+    return self._browser.button(text="Bulk Complete")
+
+  def is_bulk_complete_displayed(self):
+    """Returns whether 'Bulk complete' button is displayed."""
+    return self.bulk_complete_button.exists
+
+  def open_bulk_complete_modal(self):
+    """Clicks bulk complete button.
+    Returns: Bulk Complete modal."""
+    self.bulk_complete_button.click()
+    return bulk_update.BulkCompleteModal()
+
+
+class WithBulkUpdateOptions(WithBulkUpdate):
+  """Contains bulk update elements presented as 3bbs menu options."""
+
+  @property
+  def bulk_complete_option(self):
+    """Returns 'Bulk complete' option from 3bbs menu."""
+    return self.three_bbs.option_by_text("Bulk Complete")
+
+  def is_bulk_complete_displayed(self):
+    """Returns whether 'Bulk complete' option is displayed in 3bbs menu."""
+    return self.bulk_complete_option.exists
+
+  def open_bulk_complete_modal(self):
+    """Clicks on 'Bulk Complete' option in 3bbs dropdown.
+    Returns: Bulk Complete modal."""
+    self.bulk_complete_option.click()
+    return bulk_update.BulkCompleteModal()

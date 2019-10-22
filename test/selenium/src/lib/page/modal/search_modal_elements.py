@@ -98,10 +98,19 @@ class _SearchResultRow(object):
     """Returns whether a row matches conditions."""
     return self._table_row.matches_conditions(self, **conditions)
 
+  def _set_selection_checkbox_state(self, is_selected):
+    """Selects or deselects checkbox responsible for search result selection
+    according to a passed  value."""
+    self._root.element(tag_name="object-selection-item").checkbox().set(
+        is_selected)
+
   def select(self):
-    """Selects search result for mapping."""
-    self._root.element(
-        tag_name="object-selection-item").checkbox().set()
+    """Selects search result."""
+    self._set_selection_checkbox_state(True)
+
+  def deselect(self):
+    """Deselects search result."""
+    self._set_selection_checkbox_state(False)
 
   def expand(self):
     """Expands an item if it is not expanded already."""

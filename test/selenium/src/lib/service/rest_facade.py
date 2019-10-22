@@ -80,12 +80,16 @@ def create_asmt_template(audit, all_cad_types=False, **attrs):
   """Create assessment template."""
   from lib.constants.element import AdminWidgetCustomAttributes
   obj_attrs, cad_attrs = _split_attrs(
-      attrs, ["cad_type", "dropdown_types_list"])
+      attrs, ["cad_type", "dropdown_types_list", "mandatory"])
   cads = []
   if all_cad_types:
     for cad_type in AdminWidgetCustomAttributes.ALL_CA_TYPES:
       cads.append(entities_factory.AssessmentTemplatesFactory.generate_cad(
           cad_type=cad_type))
+  if "cads_list" in attrs:
+    cads = [
+        entities_factory.AssessmentTemplatesFactory.generate_cad(**cad_dict)
+        for cad_dict in attrs["cads_list"]]
   if "cad_type" in cad_attrs:
     cads = [entities_factory.AssessmentTemplatesFactory.generate_cad(
         **cad_attrs)]

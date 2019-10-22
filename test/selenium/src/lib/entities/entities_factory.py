@@ -103,8 +103,7 @@ class EntitiesFactory(object):
     if not hasattr(obj, "access_control_list"):
       obj.access_control_list = []
     attrs_to_set = {
-        acr_name: PeopleFactory.extract_people_emails(person_list)
-    }
+        acr_name: PeopleFactory.extract_people_emails(person_list)}
     if rewrite_acl:
       obj.access_control_list = [
           i for i in obj.access_control_list if i['ac_role_id'] != role_id]
@@ -288,19 +287,20 @@ class CustomAttributeDefinitionsFactory(EntitiesFactory):
   def generate_cads_for_asmt_tmpls(cads):
     """Generate list of dictionaries of CA random values from exist list CA
     definitions according to CA 'title', 'attribute_type',
-    'multi_choice_options' and 'multi_choice_mandatory' for Dropdown.
+    'multi_choice_options', 'multi_choice_mandatory' and 'mandatory'for
+    Dropdown.
     Return list of dictionaries of CA definitions that ready to use
     via REST API:
     Example:
     :return
     [{"title": "t1", "attribute_type": "Text", "multi_choice_options": "",
-      "multi_choice_mandatory": ""},
+      "multi_choice_mandatory": "", "mandatory: False"},
      {"title":"t2", "attribute_type":"Rich Text", "multi_choice_options":"",
-      "multi_choice_mandatory": ""}]
+      "multi_choice_mandatory": "", "mandatory: True"}]
     """
-    return [{k: (v if v else "") for k, v in cad.__dict__.items()
+    return [{k: (v if v is not None else "") for k, v in cad.__dict__.items()
              if k in ("title", "attribute_type", "multi_choice_options",
-                      "multi_choice_mandatory")}
+                      "multi_choice_mandatory", "mandatory")}
             for cad in cads]
 
   def create_dashboard_ca(self, definition_type):
@@ -562,14 +562,14 @@ class AssessmentTemplatesFactory(EntitiesFactory):
         for _ in xrange(1, count_to_clone + 1)]
 
   @staticmethod
-  def generate_cad(**attrs):
+  def generate_cad(mandatory=False, **attrs):
     """Generates CAD for asmt template."""
     is_dropdown = (attrs["cad_type"] == AdminWidgetCustomAttributes.DROPDOWN)
     if is_dropdown and "dropdown_types_list" in attrs:
       asmt_tmpl_factory = AsmtTemplateWithDropdownFactory()
     else:
       asmt_tmpl_factory = AsmtTemplateWithAttrFactory()
-    return asmt_tmpl_factory.generate_cad(**attrs)
+    return asmt_tmpl_factory.generate_cad(mandatory, **attrs)
 
   def _set_attrs(self, is_add_rest_attrs=False, **attrs):
     """Creates random object's instance, if 'is_add_rest_attrs' then add
@@ -600,7 +600,7 @@ class AsmtTemplateWithDropdownFactory(AssessmentTemplatesFactory):
   """Class for assesment template with Dropdown option."""
 
   @classmethod
-  def generate_cad(cls, **attrs):
+  def generate_cad(cls, mandatory=False, **attrs):
     """Creates multi-choice dropdown CAD for asmt template."""
     multi_choice_opts = {"file": "2", "url": "4", "comment": "1",
                          "file_url": "6", "url_comment": "5",
@@ -611,6 +611,7 @@ class AsmtTemplateWithDropdownFactory(AssessmentTemplatesFactory):
     cad = cad_factory.create(
         attribute_type=AdminWidgetCustomAttributes.DROPDOWN,
         definition_type="",
+        mandatory=mandatory,
         multi_choice_mandatory=(",".join(
             multi_choice_opts[dropdown_type]
             for dropdown_type in dropdown_types_list)),
@@ -624,10 +625,11 @@ class AsmtTemplateWithAttrFactory(AssessmentTemplatesFactory):
   """Class for assesment template with text option."""
 
   @classmethod
-  def generate_cad(cls, **attrs):
+  def generate_cad(cls, mandatory=False, **attrs):
     """Creates CAD for asmt template."""
     cad_factory = CustomAttributeDefinitionsFactory()
-    cad = cad_factory.create(attribute_type=attrs["cad_type"])
+    cad = cad_factory.create(attribute_type=attrs["cad_type"],
+                             mandatory=mandatory)
     return cad_factory.generate_cads_for_asmt_tmpls([cad])[0]
 
 

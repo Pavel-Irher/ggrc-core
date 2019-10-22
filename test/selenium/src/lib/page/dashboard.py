@@ -10,7 +10,7 @@ from lib.constants import locator
 from lib.element import tab_element, page_elements
 from lib.page import widget_bar, lhn
 from lib.page.modal import global_search
-from lib.page.widget import object_modal
+from lib.page.widget import object_modal, page_mixins
 from lib.utils import selenium_utils
 
 
@@ -231,7 +231,7 @@ class AllObjectsDashboard(widget_bar.AllObjectsDashboard, GenericHeader):
   # pylint: disable=abstract-method
 
 
-class MyAssessments(base.WithBrowser):
+class MyAssessments(page_mixins.WithBulkUpdateButtons):
   """Model for 'My Assessments' page."""
 
   def __init__(self, driver=None):
@@ -248,12 +248,3 @@ class MyAssessments(base.WithBrowser):
     status."""
     return page_elements.MultiselectDropdown(
         self._browser.element(tag_name="tree-status-filter"))
-
-  @property
-  def bulk_complete_button(self):
-    """Represents 'Bulk complete' button."""
-    return self._browser.button(text="Bulk Complete")
-
-  def is_bulk_complete_displayed(self):
-    """Returns whether 'Bulk complete' button is displayed."""
-    return self.bulk_complete_button.exists

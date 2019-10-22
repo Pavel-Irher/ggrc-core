@@ -8,7 +8,7 @@ import re
 
 from lib import url, users, base, browsers, factory
 from lib.constants import objects, element, object_states
-from lib.entities import entities_factory
+from lib.entities import entities_factory, entity
 from lib.page import dashboard
 from lib.page.modal import unified_mapper
 from lib.page.widget import (generic_widget, object_modal, import_page,
@@ -461,3 +461,59 @@ def soft_assert_bulk_complete_for_opened_asmts(soft_assert, asmts, page,
         page.is_bulk_complete_displayed() == is_displayed,
         "'Bulk complete' for assessment with '{}' status should {}be "
         "available.".format(status, "" if is_displayed else "not "))
+
+
+def complete_asmts_in_bulk(page, asmts, soft_assert):
+  """Performs bulk complete for assessments."""
+  modal = page.open_bulk_complete_modal()
+  soft_assert.expect(not modal.is_complete_btn_active,
+                     "'Complete' button should not be active before "
+                     "selecting assessments for bulk operation.")
+  modal.select_assessments_section.click_select_all()
+  deselected_asmt = asmts.pop()
+  modal.select_assessments_section.deselect_asmt_by_tittle(
+      deselected_asmt.title)
+  modal.select_assessments_section.click_select_button()
+  cads = asmts[0].custom_attribute_definitions
+  dropdown_cas_name = [
+      cad for cad in cads
+      if cad["attribute_type"] ==
+      element.AdminWidgetCustomAttributes.DROPDOWN][0]["title"].upper()
+  evidence_url = string_utils.StringMethods.random_string()
+  comment = entities_factory.CommentsFactory().create()
+  cas = (entities_factory.CustomAttributeDefinitionsFactory()
+         .generate_custom_attributes([
+             entity.Representation.repr_dict_to_obj(cad)
+             for cad in cads if cad["title"] != element.Base.TYPE]))
+  modal.custom_attributes_section.fill_lcas(
+      custom_attributes=cas, dropdown_cas_name=dropdown_cas_name,
+      url=evidence_url, comment=comment.description)
+  modal.click_complete_button()
+  page.bulk_update_submitted_msg.wait_until(lambda e: e.exists)
+  page.bulk_update_finalized_msg.wait_until(lambda e: e.exists)
+  for asmt in asmts:
+    rest_asmt_obj = rest_service.ObjectsInfoService().get_obj(asmt)
+    comment.update_attrs(
+        created_at=rest_service.ObjectsInfoService().get_comment_obj(
+            paren_obj=asmt,
+            comment_description=comment.description).created_at).repr_ui()
+    asmt.update_attrs(custom_attributes=cas, evidence_urls=[evidence_url],
+                      comments=[comment],
+                      status=object_states.READY_FOR_REVIEW,
+                      updated_at=rest_asmt_obj.updated_at,
+                      modified_by=rest_asmt_obj.modified_by)
+  asmts.append(deselected_asmt)
+  return asmts
+
+
+def check_user_can_perform_bulk_complete(soft_assert, page, asmts):
+  """Checks that user can preform 'Bulk Complete' for Assessments."""
+  exp_asmts = complete_asmts_in_bulk(page, asmts, soft_assert)
+  asmt_service = webui_service.AssessmentsService()
+  # tests are failing due to "custom_attributes" collecting from UI need to
+  # be improved. Unfilled CAs need to be set as None. I think it should be
+  # done in update_obj_scope method in info_widget.
+  for asmt in exp_asmts:
+    soft_assert.expect_equal(
+        asmt.repr_ui(), asmt_service.get_obj_from_info_page(asmt), "audit")
+  soft_assert.assert_expectations()

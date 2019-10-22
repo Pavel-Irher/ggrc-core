@@ -243,7 +243,7 @@ class CustomAttributeManager(object):
             class_name="info-pane__section-title")
     else:
       elements = self._browser.element(
-          tag_name="assessment-local-ca").elements(
+          class_name="fields-wrapper").elements(
           class_name="field__title-text")
     return list(elements)
 
@@ -309,7 +309,7 @@ class CustomAttribute(object):
     if self._ca_manager.is_global:
       value = self._ca_strategy.get_gcas_from_inline()
     else:
-      value = self._ca_strategy.get_lcas_from_inline()
+      value = self._ca_strategy.get_lcas_value()
     empty_string_strategies = (
         TextCAActionsStrategy, RichTextCAActionsStrategy,
         MultiselectCAActionsStrategy, DropdownCAActionsStrategy)
@@ -373,13 +373,19 @@ class CAActionsStrategy(object):
 class TextCAActionsStrategy(CAActionsStrategy):
   """Actions for Text CA."""
 
-  def __init__(self, *args):
-    super(TextCAActionsStrategy, self).__init__(*args)
-    self._input = self._root.text_field(class_name="text-field")
+  @property
+  def _input(self):
+    """Returns local custom attribute input element."""
+    return self._root.text_field(class_name="text-field")
 
-  def get_lcas_from_inline(self):
-    """Gets value of inline LCA field."""
-    return self._input.value
+  @property
+  def _readonly_value(self):
+    """Returns 'Text' value if assessment was completed."""
+    return self._root.element(tag_name="readonly-inline-content").text
+
+  def get_lcas_value(self):
+    """Gets value of LCA field."""
+    return self._input.value if self._input.exists else self._readonly_value
 
   def set_lcas_from_inline(self, value):
     """Sets value of inline LCA field."""
@@ -394,18 +400,25 @@ class TextCAActionsStrategy(CAActionsStrategy):
 class RichTextCAActionsStrategy(CAActionsStrategy):
   """Actions for Rich text CA."""
 
-  def __init__(self, *args):
-    super(RichTextCAActionsStrategy, self).__init__(*args)
-    self._input = self._root.element(class_name="ql-editor")
+  @property
+  def _input(self):
+    """Returns local custom attribute input element."""
+    return self._root.element(class_name="ql-editor")
+
+  @property
+  def _readonly_value(self):
+    """Returns 'Rich Text' value if assessment was completed."""
+    return self._root.element(tag_name="readonly-inline-content").text
 
   @property
   def is_inline_edit_opened(self):
     """Checks if input opened."""
     return self._input.exists
 
-  def get_lcas_from_inline(self):
-    """Gets value of inline LCA field."""
-    return self._input.text
+  def get_lcas_value(self):
+    """Gets value of LCA field."""
+    return (self._input.text if self.is_inline_edit_opened
+            else self._readonly_value)
 
   def set_lcas_from_inline(self, value):
     """Sets value of inline LCA field."""
@@ -424,9 +437,17 @@ class DateCAActionsStrategy(CAActionsStrategy):
     super(DateCAActionsStrategy, self).__init__(*args)
     self._datepicker = Datepicker(self._root)
 
-  def get_lcas_from_inline(self):
-    """Gets value of inline LCA field."""
-    return self._datepicker.get_value()
+  @property
+  def _readonly_value_container(self):
+    """Returns element that contains'Date' value if assessment was
+    completed."""
+    return self._root.element(tag_name="date-form-field-view")
+
+  def get_lcas_value(self):
+    """Gets value of LCA field."""
+    return (self._readonly_value_container.text
+            if self._readonly_value_container.exists
+            else self._datepicker.get_value())
 
   def set_lcas_from_inline(self, value):
     """Sets value of inline LCA field."""
@@ -448,8 +469,8 @@ class CheckboxCAActionsStrategy(CAActionsStrategy):
     """Gets value of inline GCA field."""
     return self._input.is_set
 
-  def get_lcas_from_inline(self):
-    """Gets value of inline LCA field."""
+  def get_lcas_value(self):
+    """Gets value of LCA field."""
     return self._input.is_set
 
   def set_lcas_from_inline(self, value):
@@ -467,13 +488,20 @@ class CheckboxCAActionsStrategy(CAActionsStrategy):
 class MultiselectCAActionsStrategy(CAActionsStrategy):
   """Actions for Multiselect CA."""
 
-  def __init__(self, *args):
-    super(MultiselectCAActionsStrategy, self).__init__(*args)
-    self._dropdown = self._root.element(class_name="multiselect-dropdown")
+  @property
+  def _dropdown(self):
+    """Returns local custom attribute multiselect dropdown element."""
+    return self._root.element(class_name="multiselect-dropdown")
 
-  def get_lcas_from_inline(self):
-    """Gets value of inline LCA field."""
-    return self._dropdown.input().value
+  @property
+  def _readonly_value(self):
+    """Returns 'Multiselect' value if assessment was completed."""
+    return self._root.element(tag_name="readonly-inline-content").text
+
+  def get_lcas_value(self):
+    """Gets value of LCA field."""
+    return (self._dropdown.input().value if self._dropdown.exists
+            else self._readonly_value)
 
   def set_lcas_from_inline(self, value):
     """Sets value of inline LCA field."""
@@ -508,9 +536,15 @@ class DropdownCAActionsStrategy(CAActionsStrategy):
     """Gets value of inline GCA field."""
     return self._gcas_input().value
 
-  def get_lcas_from_inline(self):
-    """Gets value of inline LCA field."""
-    return self._lcas_input().value
+  @property
+  def _readonly_value(self):
+    """Returns 'Dropdown' value if assessment was completed."""
+    return self._root.element(tag_name="text-form-field-view").text
+
+  def get_lcas_value(self):
+    """Gets value of LCA field."""
+    return (self._lcas_input().value if self._lcas_input().exists
+            else self._readonly_value)
 
   def set_lcas_from_inline(self, value):
     """Sets value of inline LCA field."""
@@ -538,8 +572,8 @@ class PersonCAActionsStrategy(CAActionsStrategy):
       return self._chosen_person_el.text
     return None
 
-  def get_lcas_from_inline(self):
-    """Gets value of inline LCA field."""
+  def get_lcas_value(self):
+    """Gets value of LCA field."""
     if self._input.exists:  # editable
       return self._input.text
     elif self._chosen_person_el.exists:  # readonly

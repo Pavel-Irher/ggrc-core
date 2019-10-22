@@ -578,6 +578,12 @@ def login_as_creator(creator):
 
 
 @pytest.fixture()
+def login_as_second_creator(second_creator):
+  """Login by user with role 'Creator'."""
+  users.set_current_user(second_creator)
+
+
+@pytest.fixture()
 def program():
   """Create a program."""
   return rest_facade.create_program()
@@ -685,6 +691,13 @@ def objectives_mapped_to_program(program):
 def audit(program):
   """Create an audit within program"""
   return rest_facade.create_audit(program)
+
+
+@pytest.fixture()
+def audit_w_auditor(program, second_creator):
+  """Create an audit within program and set a user with global creator role as
+  an auditor."""
+  return rest_facade.create_audit(program, auditors=second_creator)
 
 
 @pytest.fixture()

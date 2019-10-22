@@ -8,9 +8,9 @@ from lib import base
 class SetValueForAsmtDropdown(base.Modal):
   """Modal for set value for assessment custom attribute."""
 
-  def __init__(self, driver):
+  def __init__(self, driver=None):
     super(SetValueForAsmtDropdown, self).__init__(driver)
-    self.modal_elem = self._browser.div(class_name="in").div(
+    self.modal_elem = self._browser.div(class_name="no-border").div(
         class_name="simple-modal")
     self.modal_header_lbl = self.modal_elem.div(
         class_name="simple-modal__header-text")

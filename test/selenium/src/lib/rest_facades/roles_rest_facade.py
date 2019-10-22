@@ -5,15 +5,14 @@ from lib import users
 from lib.constants import roles, objects
 from lib.decorator import memoize
 from lib.entities import entities_factory
-from lib.entities.entity import AccessControlRoleEntity
 from lib.service import rest_facade
 
 
 def get_role_name_and_id(object_type, role):
   """Returns role name and id as dict according to passed role entity or
   name and object type."""
-  if isinstance(role, AccessControlRoleEntity):
-    return {"role_name": role.name, "role_id": role.id}
+  if callable(role):
+    return {"role_name": role().name, "role_id": role().id}
   return {"role_name": role, "role_id": roles.ACLRolesIDs.id_of_role(
       object_type, role)}
 
