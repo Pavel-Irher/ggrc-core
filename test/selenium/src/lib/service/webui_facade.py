@@ -430,6 +430,8 @@ def soft_assert_bulk_complete_for_completed_asmts(soft_assert, asmts, page):
   displayed for several assessments when all of them are in one of the
   completed states."""
   for asmt, status in zip(asmts, object_states.COMPLETED_STATES):
+    roles_rest_facade.add_verifier_to_set_obj_state(asmt, status,
+                                                    users.current_user())
     rest_facade.update_object(asmt, status=status)
     browsers.get_browser().refresh()
     ui_utils.wait_for_spinner_to_disappear()
@@ -445,6 +447,8 @@ def soft_assert_bulk_complete_for_opened_asmts(soft_assert, asmts, page,
   not for several assessments when at least one of them is in one of the opened
   states."""
   for status in object_states.OPENED_STATES:
+    roles_rest_facade.add_verifier_to_set_obj_state(asmts[-1], status,
+                                                    users.current_user())
     rest_facade.update_object(asmts[-1], status=status)
     browsers.get_browser().refresh()
     ui_utils.wait_for_spinner_to_disappear()

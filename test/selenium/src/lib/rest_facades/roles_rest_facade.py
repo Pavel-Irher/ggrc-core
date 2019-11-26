@@ -2,7 +2,7 @@
 # Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 """REST facade for roles."""
 from lib import users
-from lib.constants import roles, objects
+from lib.constants import roles, objects, object_states
 from lib.decorator import memoize
 from lib.entities import entities_factory
 from lib.entities.entity import AccessControlRoleEntity
@@ -40,3 +40,12 @@ def custom_asmt_read_role():
   """Returns custom access control role with 'Read' rights for Assessment."""
   return custom_read_role(objects.get_singular(objects.ASSESSMENTS,
                                                title=True))
+
+
+def add_verifier_to_set_obj_state(obj, state, person):
+  """Assign a person as verifier if verifier presence is necessary for
+  setting an object into specific state and obj has no verifiers assigned."""
+  if state in object_states.VERIFIER_REQUIRING_STATES and not obj.verifiers:
+    rest_facade.update_acl(
+        objs=[obj], people=person,
+        **get_role_name_and_id(obj.type, roles.VERIFIERS))

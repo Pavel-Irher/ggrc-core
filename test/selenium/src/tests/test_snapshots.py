@@ -16,6 +16,7 @@ from lib.constants import messages, objects, object_states, roles
 from lib.constants.element import Lhn, MappingStatusAttrs
 from lib.entities.entity import Representation
 from lib.factory import get_cls_webui_service, get_cls_rest_service
+from lib.rest_facades import roles_rest_facade
 from lib.service import rest_facade, webui_facade, webui_service
 from lib.utils.filter_utils import FilterUtils
 
@@ -668,6 +669,7 @@ class TestSnapshots(base.Test):
        ("assessment", object_states.IN_PROGRESS),
        ("assessment", object_states.READY_FOR_REVIEW),
        ("assessment", object_states.COMPLETED),
+       ("assessment", object_states.VERIFIED),
        pytest.mark.xfail(reason="Issue GGRC-2817", strict=True)
           (("issue_mapped_to_audit", object_states.DRAFT))],
       indirect=["obj"])
@@ -691,6 +693,8 @@ class TestSnapshots(base.Test):
     control = audit_with_one_control["control"].repr_ui()
     audit = audit_with_one_control["audit"]
     existing_obj = obj
+    roles_rest_facade.add_verifier_to_set_obj_state(
+        existing_obj, object_state, users.current_user())
     existing_obj_name = objects.get_plural(existing_obj.type)
     (get_cls_webui_service(existing_obj_name)(selenium).
         map_objs_via_tree_view_item(src_obj=audit, dest_objs=[control]))
