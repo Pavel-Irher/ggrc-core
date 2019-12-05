@@ -6,6 +6,7 @@
 import canMap from 'can-map';
 import {getComponentVM} from '../../../../js_specs/spec-helpers';
 import Component from '../request-review-modal';
+import * as ObjectReviewUtils from '../../../plugins/utils/object-review-utils';
 import Review from '../../../models/service-models/review';
 
 describe('request-review-modal component', () => {
@@ -75,8 +76,7 @@ describe('request-review-modal component', () => {
         email_message: originalEmailComment,
       });
 
-      spyOn(review, 'isNew').and.returnValue(false);
-      spyOn(review, 'save').and.returnValue(saveDfd);
+      spyOn(ObjectReviewUtils, 'saveReview').and.returnValue(saveDfd);
 
       viewModel.attr('review', review);
       viewModel.attr('modalState.open', true);
@@ -86,7 +86,7 @@ describe('request-review-modal component', () => {
     it('should not save review in case of empty ACL', () => {
       viewModel.save();
 
-      expect(review.save).not.toHaveBeenCalled();
+      expect(ObjectReviewUtils.saveReview).not.toHaveBeenCalled();
     });
 
     it('should update ACL', (done) => {
@@ -97,7 +97,7 @@ describe('request-review-modal component', () => {
       viewModel.save();
 
       saveDfd.then(() => {
-        expect(review.save).toHaveBeenCalled();
+        expect(ObjectReviewUtils.saveReview).toHaveBeenCalled();
         expect(viewModel.attr('review.access_control_list').serialize())
           .toEqual(newACL);
         done();
@@ -123,7 +123,7 @@ describe('request-review-modal component', () => {
       viewModel.save();
 
       saveDfd.then(() => {
-        expect(review.save).toHaveBeenCalled();
+        expect(ObjectReviewUtils.saveReview).toHaveBeenCalled();
         expect(viewModel.attr('review.status')).toEqual('Unreviewed');
         done();
       });

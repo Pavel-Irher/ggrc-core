@@ -16,23 +16,28 @@ const createReviewInstance = (reviewableInstance) => {
 };
 const saveReview = (review, reviewableInstance) => {
   if (!review.isNew()) {
-    return review.save();
+    return review.save().then(async (review) => {
+      /**
+       * Refresh ReviewableInstance to get E-tag after PUT
+       */
+      await reviewableInstance.refresh();
+      return review;
+    });
   }
 
-  return review.save()
-    .then(() => {
-      /**
-       * We need to refresh Permission because user with Edit rights should have
-       * permission for Review object after POST review.
-       * ReviewableInstance should also be refreshed after POST review
-       * to get review stub in properties
-       */
-      return $.when(refreshPermissions(), reviewableInstance.refresh());
-    })
+  return review.save().then(async () => {
+    /**
+     * We need to refresh Permission because user with Edit rights should have
+     * permission for Review object after POST review.
+     * ReviewableInstance should also be refreshed after POST review
+     * to get review stub in properties
+     */
+    await Promise.all([refreshPermissions(), reviewableInstance.refresh()]);
     /**
      * Refresh Review object to get E-tag
      */
-    .then(() => review.refresh());
+    return review.refresh();
+  });
 };
 
 export {
