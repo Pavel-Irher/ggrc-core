@@ -24,18 +24,7 @@
   background: $white;
   z-index: zIndex(header-content);
   padding-left: 30px;
-
-  @media (max-width: 1200px) {
-    .menu {
-      li {
-        a {
-          span {
-            display: none;
-          }
-        }
-      }
-    }
-  }
+  
   .entities {
     font-size: 18px;
     min-width: 300px;

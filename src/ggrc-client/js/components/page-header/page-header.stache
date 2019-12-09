@@ -42,24 +42,24 @@
 </h1>
 
 <ul class="menu">
-  <li>
+  <li class="menu__item">
     <a href="javascript://"
-       class="btn btn-small btn-lightBlue search"
+       class="btn btn-small btn-lightBlue menu__link menu__search search"
        data-toggle="unified-search"
        data-join-object-type="MultitypeSearch"
        data-original-title="search items">
       <div class="oneline">
-        <i class="fa fa-search"></i>
+        <i class="fa fa-search menu__icon"></i>
         {{#if showTitles}}Global Search{{/if}}
       </div>
     </a>
   </li>
-  <li>
+  <li class="menu__item">
     <feedback-link>
       <tooltip-content placement:from="'bottom'"
                        content:from="title">
         <div class="oneline">
-          <a href="{{link}}"
+          <a class="menu__link" href="{{link}}"
             target="_blank"
             data-trim-target="true"
             class="btn btn-small btn-gray feedback feedback_trimmed">
@@ -69,86 +69,83 @@
       </tooltip-content>
     </feedback-link>
   </li>
-  <li>
-    <a href="/dashboard#!task">
+  <li class="menu__item">
+    <a class="menu__link" href="/dashboard#!task">
       <div class="oneline">
         {{#if showTitles}}My Tasks{{/if}}
         <tasks-counter person:from="current_user"
         ></tasks-counter>
       </div></a>
   </li>
-  <li>
-    <a href="/assessments_view">
+  <li class="menu__item">
+    <a class="menu__link" href="/assessments_view">
       <div class="oneline">
         {{#if showTitles}}My Assessments{{/if}}
       </div>
     </a>
   </li>
-  <li>
-    <a id="allObjectView" href="/objectBrowser#!regulation">
+  <li class="menu__item">
+    <a class="menu__link" id="allObjectView" href="/objectBrowser#!regulation">
       <div class="oneline">
         {{#if showTitles}}All Objects{{/if}}
       </div>
     </a>
   </li>
-  <li>
-    <a href="/import" target="_blank">
+  <li class="menu__item">
+    <a class="menu__link" href="/import" target="_blank">
       <div class="oneline">
         {{#if showTitles}}Import{{/if}}
       </div>
     </a>
   </li>
-  <li class="user user-dropdown dropdown">
-    <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button"
+  <li class="menu__item user user-dropdown dropdown">
+    <a href="javascript:void(0)" class="menu__link dropdown-toggle" data-toggle="dropdown" role="button"
       on:el:click="handleMenuOpening">
       <div class="oneline">
         <i class="fa fa-user"></i>
         <i class="fa fa-caret-down"></i>
       </div>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="drop1" role="menu">
-      <li class="user-email">
+    <ul class="menu__dropdown dropdown-menu" aria-labelledby="drop1" role="menu">
+      <li class="dropdown-menu__item dropdown-menu__info-option dropdown-menu__user-name
+        dropdown-menu__title">
         {{current_user.email}}
       </li>
-      <li>
-        <a href="/export" class="export-btn" target="_blank">
-          <div class="oneline">
-            <i class="fa fa-sign-out"></i>
-            {{#if showTitles}}Export{{/if}}
-          </div>
+      <li class="dropdown-menu__item">
+        <a class="dropdown-menu__link dropdown-menu__title" href="/export" target="_blank">
+          <i class="fa fa-sign-out dropdown-menu__icon"></i>
+          {{#if showTitles}}Export{{/if}}
         </a>
       </li>
       {{#current_user_is_admin}}
-        <li>
-          <a href="/admin#!people_list" class="admin-btn">
-            <div class="oneline">
-              <i class="fa fa-tachometer"></i>
-              {{#if showTitles}}Administration{{/if}}
-            </div>
+        <li class="dropdown-menu__item">
+          <a class="dropdown-menu__link dropdown-menu__title" href="/admin#!people_list">
+            <i class="fa fa-tachometer dropdown-menu__icon"></i>
+            {{#if showTitles}}Administration{{/if}}
           </a>
         </li>
       {{/current_user_is_admin}}
-      <li>
-        <a id="page-help" href="{{helpUrl}}" target="_blank">
-          <i class="fa fa-question-circle"></i>
+      <li class="dropdown-menu__item">
+        <a class="dropdown-menu__link dropdown-menu__title" href="{{helpUrl}}" target="_blank">
+          <i class="fa fa-question-circle dropdown-menu__icon"></i>
           Help
         </a>
       </li>
       {{#if showReleaseNotes}}
-        <li class="menu-item">
+        <li class="dropdown-menu__item">
           <release-notes-menu-item>
           </release-notes-menu-item>
         </li>
       {{/if}}
-      <li class="notify-wrap">
+      <li class="dropdown-menu__item dropdown-menu__info-option">
         <lazy-render trigger:from="menuInitialized">
           <notifications-menu-item>
           </notifications-menu-item>
         </lazy-render>
       </li>
-      <li>
-        <a class="nav-logout" href="/logout" tabindex="-1">
-          <i class="fa fa-power-off"></i>
+      <li class="dropdown-menu__item">
+        <a class="dropdown-menu__link dropdown-menu__title" href="/logout" tabindex="-1">
+          <i class="fa fa-power-off dropdown-menu__icon"></i>
           Logout
         </a>
       </li>

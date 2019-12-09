@@ -3,15 +3,13 @@
   Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 }}
 
-<span>
-  <i class="fa fa-clock-o"></i>
+<div class="dropdown-menu__title">
+  <i class="fa fa-clock-o dropdown-menu__icon"></i>
   Notifications
-</span>
-<div class="inner-list">
-  <label>
-    <input type="checkbox" name="notifications"
-           el:checked:bind="emailDigest"
-           {{#if isSaving}} disabled{{/if}}/>
-    Daily email digest
-  </label>
 </div>
+<label class="dropdown-menu__content">
+  <input class="dropdown-menu__checkbox" type="checkbox" name="notifications"
+          el:checked:bind="emailDigest"
+          {{#if isSaving}} disabled{{/if}}/>
+  Daily email digest
+</label>

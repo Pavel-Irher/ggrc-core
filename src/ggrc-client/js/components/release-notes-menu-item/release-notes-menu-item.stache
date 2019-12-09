@@ -3,12 +3,10 @@
     Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
 }}
 
-<a on:el:click="open(scope.event)">
-  <span class="menu-item__icon">
-    <i class="fa fa-bullhorn" aria-hidden="true"></i>
-  </span>
-  <span class="menu-item__title">What's new in GGRC</span>
-  <div class="menu-item__subtitle">
+<a class="dropdown-menu__link" on:el:click="open(scope.event)">
+  <i class="fa fa-bullhorn dropdown-menu__icon" aria-hidden="true"></i>
+  <span class="dropdown-menu__title">What's new in GGRC</span>
+  <div class="dropdown-menu__content">
     Version {{version}}
   </div>
 

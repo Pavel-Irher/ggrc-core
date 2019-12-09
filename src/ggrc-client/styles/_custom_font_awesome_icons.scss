@@ -5,6 +5,7 @@
 
 .fa {
   font-size: 16px;
+  color: $black;
   &.red {
     color: #ce3e3e;
   }
@@ -22,9 +23,6 @@
   }
   &.gray {
     color: #b2b2b2;
-  }
-  a & {
-    color: $black;
   }
 }
 
