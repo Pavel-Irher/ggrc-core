@@ -14,7 +14,7 @@
     <div class="task-list">
       <div class="task_group_tasks__header">
           <div class="task_group_tasks__header-item">
-              Title
+              Task Title
           </div>
           <div class="task_group_tasks__header-item">
               Task Assignees

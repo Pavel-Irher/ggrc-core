@@ -119,7 +119,7 @@ class TestCycleTaskStatusUpdate(ggrc_test.TestCase):
   def build_import_data(self, task_statuses):
     return [OrderedDict([("object_type", self.ALIAS),
                          ("Code*", self.tasks[idx].slug),
-                         ("State", status)])
+                         ("Task State", status)])
             for idx, status in enumerate(task_statuses)]
 
   @ddt.unpack
@@ -241,7 +241,7 @@ class TestCycleTaskStatusUpdate(ggrc_test.TestCase):
   def __build_status_error_resp(self, key, error_tmpl, exception_statuses):
     """Return expected response dict based on sent arguments."""
     error_tmpl = self.__build_error_tmpl(error_tmpl,
-                                         column_name="State",
+                                         column_name="Task State",
                                          message="Invalid state '{}'")
     return {
         self.ALIAS: {
@@ -312,7 +312,7 @@ class TestCycleTaskStatusUpdate(ggrc_test.TestCase):
                                 start_structure=start_structure)
 
   @ddt.data(
-      ("Start Date", "Due Date"),
+      ("Task Start Date", "Task Due Date"),
   )
   def test_for_date_compare_error(self, columns):
     """Validate task import data where {0[0]} bigger than {0[1]}."""

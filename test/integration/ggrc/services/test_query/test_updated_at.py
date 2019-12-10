@@ -67,13 +67,23 @@ class TestUpdatedAt(WithQueryApi, TestCase):
       expected_not_in_id.add(expected_not_in.id)
     response_in = self.simple_query(
         model_name,
-        expression=["Last Updated Date", "~", "05/20/2018"],
+        expression=[
+            "Task Last Updated Date" if model_name == "TaskGroupTask"
+            else "Last Updated Date",
+            "~",
+            "05/20/2018"
+        ],
         type_="ids",
         field="ids"
     )
     response_not_in = self.simple_query(
         model_name,
-        expression=["Last Updated Date", "!~", "2018-05-20"],
+        expression=[
+            "Task Last Updated Date" if model_name == "TaskGroupTask"
+            else "Last Updated Date",
+            "!~",
+            "2018-05-20"
+        ],
         type_="ids",
         field="ids"
     )

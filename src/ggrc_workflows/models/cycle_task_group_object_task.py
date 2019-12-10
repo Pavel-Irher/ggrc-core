@@ -69,8 +69,6 @@ class CycleTaskGroupObjectTask(roleable.Roleable,
   # Note: this statuses are used in utils/query_helpers to filter out the tasks
   # that should be visible on My Tasks pages.
 
-  PROPERTY_TEMPLATE = u"task {}"
-
   _fulltext_attrs = [
       ft_attributes.DateFullTextAttr("end_date", 'end_date',),
       ft_attributes.FullTextAttr("group title",
@@ -80,7 +78,7 @@ class CycleTaskGroupObjectTask(roleable.Roleable,
       ft_attributes.FullTextAttr("object_approval",
                                  'object_approval',
                                  with_template=False),
-      ft_attributes.FullTextAttr("cycle title", 'cycle', ['title'], False),
+      ft_attributes.FullTextAttr("workflow title", 'cycle', ['title'], False),
       ft_attributes.FullTextAttr("group assignee",
                                  lambda x: x.cycle_task_group.contact,
                                  ['email', 'name'],
@@ -226,7 +224,7 @@ class CycleTaskGroupObjectTask(roleable.Roleable,
                         + "</ol>"
 
   _aliases = {
-      "title": "Summary",
+      "title": "Task Title",
       "description": "Task Description",
       "finished_date": {
           "display_name": "Actual Finish Date",
@@ -235,11 +233,11 @@ class CycleTaskGroupObjectTask(roleable.Roleable,
           "display_name": "Actual Verified Date",
       },
       "cycle": {
-          "display_name": "Cycle",
+          "display_name": "Workflow Code",
           "filter_by": "_filter_by_cycle",
       },
       "cycle_task_group": {
-          "display_name": "Task Group",
+          "display_name": "Task Group Code",
           "mandatory": True,
           "filter_by": "_filter_by_cycle_task_group",
       },
@@ -247,8 +245,40 @@ class CycleTaskGroupObjectTask(roleable.Roleable,
           "display_name": "Task Type",
           "mandatory": True,
       },
-      "end_date": "Due Date",
-      "start_date": "Start Date",
+      "end_date": "Task Due Date",
+      "start_date": "Task Start Date",
+      "updated_at": {
+          "display_name": "Task Last Updated Date",
+      },
+      "modified_by": {
+          "display_name": "Task Last Updated By",
+      },
+      "created_at": {
+          "display_name": "Task Created Date",
+      },
+      "last_deprecated_date": {
+          "display_name": "Task Last Deprecated Date",
+          "view_only": True,
+      },
+      "status": {
+          "display_name": "Task State",
+          "mandatory": False,
+          "description": (
+              u"Options are: \n{states} \n"
+              u"1) Make sure that `Actual Verified Date` isn't set, "
+              u"if cycle task state is <'Assigned' / 'In Progress' / "
+              u"'Declined' / 'Deprecated' / 'Finished'>. "
+              u"Type double dash '--' into `Actual Verified Date` "
+              u"cell to remove it. \n"
+              u"2) Make sure that `Actual Finish Date` isn't set, "
+              u"if cycle task state is <'Assigned' / 'In Progress' / "
+              u"'Declined' / 'Deprecated'>. Type double dash '--' into "
+              u"`Actual Finish Date` cell to "
+              u"remove it.".format(states='\n'.join(
+                  wf_mixins.CycleTaskStatusValidatedMixin.VALID_STATES)
+              )
+          ),
+      }
   }
 
   @builder.simple_property

@@ -409,8 +409,12 @@ export default canComponent.extend({
 
       displayName = object.display_name() || object.description;
       displayType = object.display_type() || object.type;
+      if (displayType === 'Comment') {
+        fieldName = 'Response/Comments';
+      } else {
+        fieldName = 'Mapping to ' + displayType + ': ' + displayName;
+      }
 
-      fieldName = 'Mapping to ' + displayType + ': ' + displayName;
       origVal = EMPTY_DIFF_VALUE;
       newVal = loCapitalize(revision.action);
       previous = chain[loFindIndex(chain, revision) - 1];

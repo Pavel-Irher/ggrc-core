@@ -120,14 +120,17 @@ class TestExportTasks(TestCase):
     ).one()
     comment = ggrc_factories.CommentFactory(description=comment_text)
     ggrc_factories.RelationshipFactory(source=task, destination=comment)
-    self.assert_slugs("task comment", comment_text, [task.slug])
+    self.assert_slugs("comment", comment_text, [task.slug])
 
   @data(
-      ("status", ["Task State", "task state", "task status"]),
-      ("end_date", ["Task Due Date", "task due date", "task end_date"]),
+      ("status", ["Task State", "task state", "status"]),
+      (
+          "end_date",
+          ["Task Due Date", "task due date", "end_date"]
+      ),
       (
           "start_date",
-          ["task Start Date", "task start date", "task start_date"],
+          ["Task Start Date", "task start date", "start_date"],
       ),
   )
   @unpack
@@ -151,12 +154,16 @@ class TestExportTasks(TestCase):
           [
               "task Last Updated Date",
               "task last updated date",
-              "task updated_at"
+              "updated_at"
           ],
       ),
       (
           "created_at",
-          ["task Created Date", "task created Date", "task created_at"],
+          [
+              "task Created Date",
+              "task created Date",
+              "created_at"
+          ],
       ),
   )
   @unpack

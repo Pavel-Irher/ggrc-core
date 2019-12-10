@@ -10,7 +10,7 @@
   <div class="row-fluid">
     <div class="span12 {{#instance.computed_errors.title}}field-failure{{/instance.computed_errors.title}}">
       <label class="form-label">
-          Task Summary
+          Task Title
           <i class="fa fa-asterisk"></i>
       </label>
       <input class="input-block-level required" id="task-title" placeholder="Enter Title" name="title" type="text" value="{{instance.title}}" tabindex="1" autofocus>
@@ -51,7 +51,7 @@
         >
         <div class="action-toolbar">
           <h6 class="action-toolbar__header">
-            Object(s) mapped to task
+            Mapped Objects
           </h6>
           <spinner-component class="control-offset" toggle:from="isLoading"></spinner-component>
         </div>
@@ -103,7 +103,7 @@
       <div class="{{#instance.computed_errors.workflow}}field-failure{{/instance.computed_errors.workflow}} {{#instance.computed_errors.cycle}}field-failure{{/instance.computed_errors.cycle}}">
         <object-loader path:from="instance.workflow">
           <label class="form-label" title="An active workflow should be created in advance">
-            Active Workflow
+            Workflow Title
             <i class="fa fa-asterisk"></i>
           </label>
           {{#if new_object_form}}
@@ -173,7 +173,7 @@
       </div>
       <div class="{{#instance.computed_errors.start_date}}field-failure{{/instance.computed_errors.start_date}}">
         <label class="form-label">
-            Start Date
+            Task Start Date
             <i class="fa fa-asterisk"></i>
         </label>
         <datepicker-component
@@ -188,7 +188,7 @@
       </div>
       <div class="{{#instance.computed_errors.end_date}}field-failure{{/instance.computed_errors.end_date}}">
         <label class="form-label form-label__extend">
-            Due Date
+            Task Due Date
             <i class="fa fa-asterisk"></i>
         </label>
         <datepicker-component

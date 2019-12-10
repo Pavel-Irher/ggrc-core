@@ -159,9 +159,9 @@ class TestWorkflowObjectColumnDefinitions(TestCase):
         "Task Group Code",
         "Code",
         "Delete",
-        'Created Date',
-        'Last Updated Date',
-        'Last Updated By',
+        'Task Created Date',
+        'Task Last Updated Date',
+        'Task Last Updated By',
     }
     self.assertEqual(expected_names, display_names)
     vals = {val["display_name"]: val for val in definitions.itervalues()}
@@ -179,23 +179,23 @@ class TestWorkflowObjectColumnDefinitions(TestCase):
     display_names = {val["display_name"] for val in definitions.itervalues()}
     element_names = {
         "Code",
-        "Cycle",
-        "Summary",
+        "Workflow Code",
+        "Task Title",
         "Task Type",
         "Task Assignees",
         "Task Secondary Assignees",
         "Task Description",
-        "Start Date",
-        "Due Date",
+        "Task Start Date",
+        "Task Due Date",
         "Actual Verified Date",
         "Actual Finish Date",
-        "Task Group",
-        "State",
+        "Task Group Code",
+        "Task State",
         "Delete",
-        "Created Date",
-        "Last Updated Date",
-        "Last Updated By",
-        "Last Deprecated Date",
+        "Task Created Date",
+        "Task Last Updated Date",
+        "Task Last Updated By",
+        "Task Last Deprecated Date",
         "Send by default",
         "Comments",
         "Recipients",
@@ -204,5 +204,5 @@ class TestWorkflowObjectColumnDefinitions(TestCase):
     expected_names = element_names.union(mapping_names).union(unmapping_names)
     self.assertEqual(expected_names, display_names)
     vals = {val["display_name"]: val for val in definitions.itervalues()}
-    self.assertTrue(vals["Summary"]["mandatory"])
+    self.assertTrue(vals["Task Title"]["mandatory"])
     self.assertTrue(vals["Task Assignees"]["mandatory"])

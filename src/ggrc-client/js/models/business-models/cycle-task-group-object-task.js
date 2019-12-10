@@ -99,9 +99,9 @@ export default Cacheable.extend({
         attr_sort_field: 'task title',
       },
       {
-        attr_title: 'Cycle Title',
+        attr_title: 'Workflow Title',
         attr_name: 'workflow',
-        attr_sort_field: 'cycle title',
+        attr_sort_field: 'workflow title',
       },
       {
         attr_title: 'Task State',

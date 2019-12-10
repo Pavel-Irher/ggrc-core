@@ -54,11 +54,11 @@ class TestCycleTaskImportUpdate(BaseTestCycleTaskImportUpdate):
   CSV_DIR = join(abspath(dirname(__file__)), "test_csvs/")
 
   IMPORTABLE_COLUMN_NAMES = [
-      "Summary",
+      "Task Title",
       "Task Description",
-      "Start Date",
-      "Due Date",
-      "State",
+      "Task Start Date",
+      "Task Due Date",
+      "Task State",
       "Task Assignees",
       "Task Secondary Assignees",
   ]
@@ -117,13 +117,13 @@ class TestCycleTaskImportUpdate(BaseTestCycleTaskImportUpdate):
       ct_data = collections.OrderedDict([
           ("object_type", "Cycle Task Group Object Task"),
           ("Code*", cycle_task.slug),
-          ("Summary*", "task active title1-Updated"),
+          ("Task Title", "task active title1-Updated"),
           ("Task Description", "task active title1 description"),
-          ("Start Date", self.ftime_historical),
-          ("Due Date", self.ftime_active),
+          ("Task Start Date", self.ftime_historical),
+          ("Task Due Date", self.ftime_active),
           ("Actual Finish Date", self.ftime_active),
           ("Actual Verified Date", self.ftime_active),
-          ("State", "Assigned"),
+          ("Task State", "Assigned"),
           ("Task Assignees", person.email),
           ("Task Secondary Assignees", person.email),
       ])

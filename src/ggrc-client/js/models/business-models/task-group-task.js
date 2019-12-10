@@ -28,8 +28,8 @@ export default Cacheable.extend({
   },
   tree_view_options: {
     attr_list: [
-      {attr_title: 'Summary', attr_name: 'title'},
-      {attr_title: 'Description', attr_name: 'description'},
+      {attr_title: 'Task Title', attr_name: 'title'},
+      {attr_title: 'Task Description', attr_name: 'description'},
     ],
     disable_columns_configuration: true,
     assigneeRoleName: 'Task Assignees',

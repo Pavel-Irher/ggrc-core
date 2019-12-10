@@ -172,7 +172,7 @@
           {{#if showWorkflowLink}}
               <div class="row-fluid wrap-row">
                 <div class="span12">
-                  <h6>Part of the workflow</h6>
+                  <h6>Workflow Title</h6>
                   <p>
                     <a href="{{workflowLink}}">
                       {{instance.workflow_title}}

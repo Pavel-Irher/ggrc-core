@@ -469,7 +469,7 @@ class TestStatusApiPatch(TestCase):
           mysql.MysqlRecordProperty.query.filter(
               mysql.MysqlRecordProperty.key == o_id,
               mysql.MysqlRecordProperty.type == o_type,
-              mysql.MysqlRecordProperty.property == "task status",
+              mysql.MysqlRecordProperty.property == "status",
           )
       )
     query = full_text_properties[0].union(*full_text_properties[1:])
