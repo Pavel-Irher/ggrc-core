@@ -106,10 +106,11 @@ class PageHeader(object):
       By.CSS_SELECTOR, _CONTENT + ' [href="/export"]')
   # dropdown toggle
   USER_MENU = ".menu " + Common.DROPDOWN_MENU
-  BUTTON_HELP = (By.CSS_SELECTOR, Common.DROPDOWN_MENU + ' #page-help')
+  BUTTON_HELP = (By.CSS_SELECTOR, Common.DROPDOWN_MENU +
+                 ' [href="#set_GGRC_EXTERNAL_HELP_URL_env_var"]')
   BUTTON_LOGOUT = (By.CSS_SELECTOR, Common.DROPDOWN_MENU + ' [href="/logout"]')
-  NOTIFICATIONS = (By.CSS_SELECTOR, USER_MENU + ' .notify-wrap')
-  EMAIL = (By.CSS_SELECTOR, USER_MENU + ' .user-email')
+  NOTIFICATIONS = (By.CSS_SELECTOR, USER_MENU + ' notifications-menu-item')
+  EMAIL = (By.CSS_SELECTOR, USER_MENU + ' .dropdown-menu__user-name')
   BUTTON_ADMIN_DASHBOARD = (
       By.CSS_SELECTOR,
       Common.DROPDOWN_MENU + ' [href="/admin#!people_list"]')
