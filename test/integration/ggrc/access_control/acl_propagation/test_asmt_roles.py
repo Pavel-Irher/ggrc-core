@@ -303,30 +303,11 @@ class TestAsmtRolesPropagation(base.TestACLPropagation):
     self.runtest(role, model, action_name, expected_result, acr_name=acr_name)
 
   @helpers.unwrap({
-      "Creator": {
-          "complete": {
-            "Assignees": True,
-            "Creators": True,
-            "Verifiers": (False, "unimplemented"),
-          },
-      },
       "Reader": {
-          "complete": {
-              "Assignees": True,
-              "Creators": True,
-              "Verifiers": (False, "unimplemented"),
-          },
           "decline": {
               "Assignees": (False, "unimplemented"),
               "Creators": (False, "unimplemented"),
               "Verifiers": True,
-          },
-      },
-      "Editor": {
-          "complete": {
-              "Assignees": True,
-              "Creators": True,
-              "Verifiers": (False, "unimplemented"),
           },
       },
   }, unwrap_keys=True)

@@ -72,6 +72,3 @@ SNAPSHOT_INVALID_OBJECT_SLUG = (u"Snapshot for object %s with ID=%s contains "
 MISSING_ASSESSMENT_VERIFIERS = (u"No verifier is assigned to the assessment. "
                                 u"The request can be further processed if "
                                 u"only a verifier is assigned.")
-
-NO_COMPLETE_WITH_VERIFIERS = (u"Line {line}: Cannot move the assessment to the"
-                              u" 'Complete' status if a verifier is assigned.")

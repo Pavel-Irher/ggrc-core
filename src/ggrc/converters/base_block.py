@@ -501,10 +501,14 @@ class ImportBlockConverter(people_cache.WithPeopleCache,
     for obj in new_objects:
       _collections.setdefault(obj.__class__, []).append(obj)
     for object_class, objects in _collections.iteritems():
+      kwargs = {}
+      if object_class.__name__ == "Assessment":
+        kwargs["check_acl"] = False
       signals.Restful.collection_posted.send(
           object_class,
           objects=objects,
           sources=[{} for _ in xrange(len(objects))],
+          **kwargs
       )
 
   def get_info(self):

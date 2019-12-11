@@ -370,11 +370,6 @@ class Assessment(Assignable,
     new_value = self.status
     if new_value == old_value:
       return None
-    if self.verifiers and new_value in self.VERIFIERS_NOT_REQUIRED \
-       and not self.verified and not self.sox_302_enabled:
-      raise model_exceptions.StatusValidationError(
-          errors.NO_COMPLETE_WITH_VERIFIERS
-      )
     if not self.verifiers and new_value in self.VERIFIERS_REQUIRED:
       raise model_exceptions.StatusValidationError(
           errors.MISSING_ASSESSMENT_VERIFIERS

@@ -461,20 +461,6 @@ class TestAssessmentStatus(TestAssessmentBase):
     self.person_id = person.id
     self.initial_state = assessment.status
 
-  def test_complete_invalid(self):
-    """Test complete not verified assessment with existing verifiers"""
-    with factories.single_commit():
-      self.assessment.add_person_with_role_name(self.person, "Verifiers")
-    response = self.api.put(self.assessment, {"status": "Completed"})
-    self.assert400(response)
-    self.assertEqual(
-        response.json['message'],
-        ggrc_errors.NO_COMPLETE_WITH_VERIFIERS
-    )
-    assessment = all_models.Assessment.query.get(self.assessment_id)
-    self.assertEqual(assessment.verified, False)
-    self.assertEqual(assessment.status, self.initial_state)
-
   @ddt.data("In Review", "Verified", "Rework Needed")
   def test_missing_verifiers_status(self, new_status):
     """Test 400 while change assessment status to {} with missing verifiers"""

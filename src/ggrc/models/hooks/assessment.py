@@ -46,6 +46,11 @@ def _validate_assessment_state(old_value, obj):
                                   "preconditions are not satisfied. "
                                   "Check preconditions_failed "
                                   "of items of self.custom_attribute_values")
+  if (new_value == obj.FINAL_STATE and
+     not obj.verified and
+     not getattr(obj, 'sox_302_enabled', False) and
+     getattr(obj, 'verifiers', [])):
+    obj.status = obj.DONE_STATE
   obj.validate_done_state(old_value)
 
 
@@ -158,7 +163,13 @@ def init_hook():  # noqa: ignore=C901
 
   # pylint: disable=unused-variable
   @signals.Restful.collection_posted.connect_via(all_models.Assessment)
-  def handle_assessment_post(sender, objects=None, sources=None, service=None):
+  def handle_assessment_post(
+      sender,
+      objects=None,
+      sources=None,
+      service=None,
+      check_acl=True
+  ):
     """Applies custom attribute definitions and maps people roles.
 
     Applicable when generating Assessment with template.
@@ -174,11 +185,12 @@ def init_hook():  # noqa: ignore=C901
 
     audit, template = None, None
     for assessment, src in itertools.izip(objects, sources):
-      try:
-        assessment.validate_done_state(assessment.START_STATE)
-      except StatusValidationError as error:
-        db.session.rollback()
-        raise error
+      if check_acl:
+        try:
+          assessment.validate_done_state(assessment.START_STATE)
+        except StatusValidationError as error:
+          db.session.rollback()
+          raise error
       audit = _get_object_from_src(
           src, _get_audit_id, all_models.Audit, current=audit)
 
