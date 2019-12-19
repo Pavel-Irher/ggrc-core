@@ -205,17 +205,20 @@ def approve_obj_review(selenium, obj):
           status=element.ReviewStates.REVIEWED,
           last_reviewed_by=users.current_user().email,
           last_reviewed_at=rest_facade.get_last_review_date(obj),
-          reviewers=users.current_user()))
+          reviewers=users.current_user()),
+      updated_at=rest_facade.get_obj_review(obj).updated_at)
 
 
 def undo_obj_review_approval(selenium, obj):
   """Cancel approved obj review.
   Returns obj with reverted to unreviewed status review."""
   _get_ui_service(selenium, obj).undo_review_approval(obj)
-  return obj.update_attrs(review=entities_factory.ReviewsFactory().create(
-      last_reviewed_by=users.current_user().email,
-      last_reviewed_at=rest_facade.get_last_review_date(obj),
-      reviewers=users.current_user()))
+  return obj.update_attrs(
+      review=entities_factory.ReviewsFactory().create(
+          last_reviewed_by=users.current_user().email,
+          last_reviewed_at=rest_facade.get_last_review_date(obj),
+          reviewers=users.current_user()),
+      updated_at=rest_facade.get_obj_review(obj).updated_at)
 
 
 def cancel_review_by_editing_obj(selenium, obj):
