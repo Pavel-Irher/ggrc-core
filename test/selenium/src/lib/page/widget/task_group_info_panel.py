@@ -103,7 +103,7 @@ class TaskRow(object):
 
   def obj_dict(self):
     """Returns object dictionary for the row."""
-    dict_keys = ["title", "assignees", "start_date", "due_date"]
+    dict_keys = ["task title", "assignees", "start_date", "due_date"]
     return self._table_row.obj_dict(self, dict_keys)
 
   @property

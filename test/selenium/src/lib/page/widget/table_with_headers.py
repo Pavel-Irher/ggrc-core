@@ -46,7 +46,6 @@ class TableRow(object):
     (headers are title-ized `dict_keys`)
     """
     result = {}
-    print("test:", row_obj.__dict__)
     for dict_key in dict_keys:
       if hasattr(row_obj, dict_key):
         value = getattr(row_obj, dict_key)  # should be a property

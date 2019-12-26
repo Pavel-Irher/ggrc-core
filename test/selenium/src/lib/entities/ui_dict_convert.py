@@ -51,7 +51,7 @@ def task_group_task_ui_to_app(ui_dict):
   """Converts TaskGroupTask ui dict to App entity."""
   return workflow_entity_factory.TaskGroupTaskFactory().create_empty(
       obj_id=ui_dict.get("obj_id"),
-      title=ui_dict["title"],
+      title=ui_dict["task title"],
       assignees=emails_to_app_people(ui_dict.get("assignees")),
       start_date=str_to_date(ui_dict["start_date"]),
       due_date=str_to_date(ui_dict["due_date"])
