@@ -3,21 +3,21 @@
  * Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
  */
 
-.object-history {
-  .object-history__header {
+.related-objects-list {
+  .related-objects-list__header {
     border-bottom: 1px solid #ccc;
     padding: 12px 0;
     text-transform: uppercase;
   }
 
-  .object-history__body {
+  .related-objects-list__body {
     display: flex;
     box-sizing: border-box;
     overflow: auto;
     position: relative;
   }
 
-  .object-history__row {
+  .related-objects-list__row {
     overflow: hidden;
     padding: 8px 0;
     cursor: default;
@@ -30,12 +30,12 @@
     }
   }
 
-  .object-history__attr {
+  .related-objects-list__attr {
     word-wrap: break-word;
     padding: 0 4px;
   }
 
-  .object-history__state {
+  .related-objects-list__state {
     display: flex;
     margin-top: 8px;
 
@@ -49,24 +49,48 @@
     }
   }
 
-  .object-history__actions {
+  .related-objects-list__actions {
     justify-content: flex-end;
     display: flex;
     height: 100%;
 
-    .object-history__action {
+    .related-objects-list__action {
       margin-left: 4px;
       align-self: center;
     }
   }
 
-  .object-history__author-info {
+  .related-objects-list__author-info {
     font-style: italic;
     margin-top: 8px;
   }
 
-  .object-history__date {
+  .related-objects-list__date {
     opacity: 0.6;
     font-style: italic;
+  }
+
+  &__align-center {
+    display: flex;
+    align-items: center;
+  }
+
+  &__fixed-height {
+    min-height: 28px;
+  }
+
+  &__hide-roles {
+    word-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    align-self: center;
+  }
+
+  &__title {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

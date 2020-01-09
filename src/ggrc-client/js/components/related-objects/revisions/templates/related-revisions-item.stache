@@ -4,10 +4,10 @@
 }}
 
 <div class="flex-size-1">
-  <div class="object-history__date">
+  <div class="related-objects-list__date">
     {{dateTime revision.updated_at}}
   </div>
-  <div class="object-history__author-info">
+  <div class="related-objects-list__author-info">
     {{#if isCreated}}
       Created
     {{else}}
@@ -37,8 +37,8 @@
 
 <div class="flex-size-1">
   {{#is_allowed 'update' instance}}
-    <div class="object-history__actions">
-        <div class="object-history__action">
+    <div class="related-objects-list__actions">
+        <div class="related-objects-list__action">
           <restored-revision-comparer-config
             instance:from="instance"
             leftRevisionId:from="lastRevision.id"

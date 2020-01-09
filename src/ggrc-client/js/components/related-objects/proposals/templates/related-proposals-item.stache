@@ -4,7 +4,7 @@
 }}
 
 <div class="flex-size-1">
-  <div class="object-history__state">
+  <div class="related-objects-list__state">
     <div class="state-value state-{{proposal.status}}"
       rel="tooltip"
       data-original-title="{{stateTooltip}}"
@@ -12,9 +12,9 @@
         {{proposal.status}}
     </div>
   </div>
-  <div class="object-history__author-info">
+  <div class="related-objects-list__author-info">
     Proposed by {{proposal.proposed_by.email}}
-    <span class="object-history__date">
+    <span class="related-objects-list__date">
       {{dateTime proposal.created_at}}
     </span>
   </div>
@@ -52,7 +52,7 @@
   />
 
 </div>
-<div class="flex-size-1 object-history__attr">
+<div class="flex-size-1 related-objects-list__attr">
   <read-more text:from="proposal.agenda"></read-more>
 </div>
 <div class="flex-size-1">

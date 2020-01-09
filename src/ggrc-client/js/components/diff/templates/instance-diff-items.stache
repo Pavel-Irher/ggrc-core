@@ -4,11 +4,11 @@
 }}
 
 {{#diff}}
-  <div class="object-history__row--attributes flex-box">
-    <div class="flex-size-1 object-history__attr">
+  <div class="related-objects-list__row--attributes flex-box">
+    <div class="flex-size-1 related-objects-list__attr">
       {{attrName}}
     </div>
-    <div class="flex-size-1 object-history__attr">
+    <div class="flex-size-1 related-objects-list__attr">
       {{#currentVal}}
         <div>
           {{#isTextLarge .}}
@@ -19,7 +19,7 @@
         </div>
       {{/currentVal}}
     </div>
-    <div class="flex-size-1 object-history__attr">
+    <div class="flex-size-1 related-objects-list__attr">
       {{#modifiedVal}}
         <div>
           {{#isTextLarge .}}

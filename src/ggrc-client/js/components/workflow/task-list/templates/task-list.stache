@@ -5,40 +5,35 @@
 
 <model-loader path:from="'business-models/task-group-task'">
   <related-objects
+    class="related-objects-list"
     paging:from="paging"
     initialOrderBy:from="initialOrderBy"
     baseInstance:from="baseInstance"
     relatedObjects:bind="items"
     modelConstructor:from="loadedModel"
     relatedItemsType:from="'TaskGroupTask'">
-    <div class="task-list">
-      <div class="task_group_tasks__header">
-          <div class="task_group_tasks__header-item">
-              Title
-          </div>
-          <div class="task_group_tasks__header-item">
-              Task Assignees
-          </div>
-          <div class="task_group_tasks__header-item">
-              Task Secondary Assignees
-          </div>
-          <div class="task_group_tasks__header-item">
-              Initial Setup
-          </div>
-          <div class="task_group_tasks__header-item">
-              Next Cycle
-          </div>
-          <div class="task_group_tasks__header-item-edit">
-          </div>
+    <div class="related-objects-list__header flex-row flex-box">
+      <div class="flex-size-6">
+        Title
       </div>
-      <div class="task_group_tasks__list">
-        <object-list
-          items:from="items"
-          isLoading:from="isLoading"
-          listType:from="'GRID'">
-            {{> task_group_tasks/task-group-subtree.stache}}
-        </object-list>
+      <div class="flex-size-6">
+        Task Assignees
       </div>
+      <div class="flex-size-6">
+        Task Secondary Assignees
+      </div>
+      <div class="flex-size-6">
+        Initial Setup
+      </div>
+      <div class="flex-size-6">
+        Next Cycle
+      </div>
+      <div class="flex-size-1"></div>
+    </div>
+    <div class="related-objects-list__body {{#isLoading}}loading{{/isLoading}}">
+      <object-list items:from="items" isLoading:from="isLoading" listType:from="'GRID'">
+        {{> task_group_tasks/task-group-subtree.stache}}
+      </object-list>
     </div>
     <div class="grid-data__toolbar grid-data__toolbar_bottom flex-box">
       <div class="grid-data__toolbar_lhs-items">

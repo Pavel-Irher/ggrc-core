@@ -458,59 +458,6 @@ select.multiple-selector {
   }
 }
 
-.field-wrap {
-  @include clearfix;
-  input {
-    width: 40%;
-    float: left;
-    margin-right: 4px;
-    &.date {
-      width: 18%;
-      margin-right: 0;
-    }
-  }
-  .required {
-    float: left;
-    width: 8px;
-    font-weight: bold;
-    color: $red;
-    margin: 6px 8px 0 3px;
-  }
-  a {
-    float: left;
-    width: 15%;
-    &.drag {
-      float: left;
-      width: 23px;
-    }
-    &.remove-field {
-      i {
-        margin-top: 5px;
-      }
-    }
-    &.pull-right {
-      width: auto;
-      float: right;
-    }
-    &.btn {
-      width: auto;
-    }
-  }
-  &.task-wrap {
-    span.empty {
-      float: left;
-      width: 23px;
-      height: 23px;
-    }
-    input {
-      width: 37%;
-      &.date {
-        width: 18%;
-      }
-    }
-  }
-}
-
 p {
   &.Draft {
     color:darken(#f60,10%);

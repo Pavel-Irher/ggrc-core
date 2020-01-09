@@ -4,8 +4,8 @@
 }}
 
 {{#if canReview}}
-  <div class="object-history__actions">
-    <div class="object-history__action">
+  <div class="related-objects-list__actions">
+    <div class="related-objects-list__action">
       <spinner-component class="revision-history__spinner" toggle:from="isLoading"></spinner-component>
       <button
         type="button"

@@ -5,7 +5,7 @@
 
 {{#baseInstance}}
 <model-loader path:from="'service-models/proposal'">
-  <related-objects class="object-history"
+  <related-objects class="related-objects-list"
                    initialOrderBy:from="'status,created_at'"
                    predefinedFilter:from="predefinedFilter"
                    baseInstance:from="baseInstance"
@@ -16,7 +16,7 @@
     <div class="grid-data__toolbar flex-box">
       <tree-pagination paging:from="paging" class="grid-data__toolbar-item"></tree-pagination>
     </div>
-    <div class="object-history__header flex-row flex-box">
+    <div class="related-objects-list__header flex-row flex-box">
       <div class="flex-size-1">
         Proposal
       </div>
@@ -35,9 +35,9 @@
       <div class="flex-size-1">
       </div>
     </div>
-    <div class="object-history__body {{#isLoading}}loading{{/isLoading}}">
+    <div class="related-objects-list__body {{#isLoading}}loading{{/isLoading}}">
       <object-list items:from="relatedObjects" isLoading:from="isLoading" listType:from="'GRID'">
-        <related-proposals-item class="object-history__row flex-box"
+        <related-proposals-item class="related-objects-list__row flex-box"
                                 instance:from="baseInstance"
                                 proposal:from="instance">
         </related-proposals-item>

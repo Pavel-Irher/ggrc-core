@@ -189,57 +189,6 @@
   display: none;
 }
 
-.task_group_tasks {
-  &__header {
-    border-bottom: 1px solid $lightGray;
-    display: flex;
-    padding: 10px 0;
-
-    &-item {
-      flex: 1 1 25%;
-      text-transform: uppercase;
-
-      &-edit {
-        width: 60px;
-      }
-    }
-  }
-
-  &__list-item {
-    .task-wrap {
-      border-bottom: 1px solid $lightGray;
-      display: flex;
-    }
-
-    &-column {
-      display: flex;
-      align-items: center;
-      flex: 1 1 25%;
-
-      & .task-group-task__column-field {
-        display:inline-block;
-        line-height:30px;
-        margin: 10px 0;
-        width: 100%;
-      }
-
-      &-action {
-        padding-top: 10px;
-        width: 60px;
-      }
-
-      > .people-list {
-        word-wrap: break-word;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-      }
-    }
-  }
-}
-
 // temporary applied styles
 // need to be removed after Task Add/Edit modals redesign
 .modal {
