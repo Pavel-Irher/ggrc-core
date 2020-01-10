@@ -15,7 +15,6 @@ import {getBulkStatesForModel} from '../../plugins/utils/state-utils';
 import ObjectOperationsBaseVM from '../view-models/object-operations-base-vm';
 import template from './object-bulk-update.stache';
 import tracker from '../../tracker';
-import {groupTypes} from '../../plugins/utils/models-utils';
 
 export default canComponent.extend({
   tag: 'object-bulk-update',
@@ -43,11 +42,6 @@ export default canComponent.extend({
     return ObjectOperationsBaseVM.extend({
       type: attrs.type,
       object: attrs.object,
-      availableTypes: function () {
-        let object = this.attr('object');
-        let type = groupTypes([object]);
-        return type;
-      },
       reduceToOwnedItems: true,
       showTargetState: true,
       targetStates: targetStates,
