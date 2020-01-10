@@ -31,6 +31,7 @@ export default Cacheable.extend({
     context: Stub,
   },
   tree_view_options: {
+    add_item_view: 'issues/tree-add-item',
     attr_list: Cacheable.attr_list.concat([
       {attr_title: 'Reference URL', attr_name: 'reference_url'},
       {attr_title: 'Effective Date', attr_name: 'start_date'},

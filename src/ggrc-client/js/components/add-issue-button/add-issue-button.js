@@ -37,6 +37,12 @@ export default canComponent.extend({
           return JSON.stringify(json);
         },
       },
+      buttonText: {
+        value: 'Raise Issue',
+      },
+      extraCssClass: {
+        value: 'btn-red',
+      },
     },
     relatedInstance: {},
     pubSub,

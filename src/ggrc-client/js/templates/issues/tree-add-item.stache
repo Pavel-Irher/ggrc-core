@@ -1,0 +1,30 @@
+{{!
+    Copyright (C) 2020 Google Inc.
+    Licensed under http://www.apache.org/licenses/LICENSE-2.0 <see LICENSE file>
+}}
+
+{{#is_allowed_to_map parentInstance model.model_singular}}
+  {{^if parentInstance.archived}}
+    {{#if_instance_of parentInstance 'Assessment'}}
+      <add-issue-button
+        relatedInstance:from="parentInstance"
+        isIssueOnAssessment:from="isAssessmentPage"
+        buttonText:from="'Create'"
+        extraCssClass:from="'btn-darkBlue'" />
+    {{else}}
+      <a
+        class="btn btn-small btn-darkBlue"
+        href="javascript://"
+        rel="tooltip"
+        data-placement="left"
+        data-toggle="unified-mapper"
+        data-join-option-type="{{model.model_singular}}"
+        data-join-object-id="{{parentInstance.id}}"
+        data-join-object-type="{{parentInstance.constructor.model_singular}}"
+        data-original-title="Map {{firstnonempty title_singular model.title_singular 'Object'}} to this {{firstnonempty parentInstance.constructor.title_singular 'Object'}}"
+      >
+        Map
+      </a>
+    {{/if_instance_of}}
+  {{/if}}
+{{/is_allowed_to_map}}

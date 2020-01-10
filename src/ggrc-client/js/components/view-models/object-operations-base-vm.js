@@ -120,8 +120,12 @@ const ObjectOperationsBaseVM = canMap.extend({
   showResults: true,
   resultsRequested: false,
   type: 'Control', // We set default as Control
-  availableTypes: function () {
-    let list = getMappingList(this.attr('object'));
+  availableTypes() {
+    const object = this.attr('object');
+    const list = object !== 'Assessment'
+      ? getMappingList(object)
+      : GGRC.config.snapshotable_objects;
+
     return groupTypes(list);
   },
   object: '',

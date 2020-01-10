@@ -67,8 +67,13 @@ export default canComponent.extend({
   },
   helpers: {
     shouldCreateObject(instance, modelShortName, options) {
-      if (modelShortName() === 'Audit' &&
-        instance().type === 'Program') {
+      const source = instance().type;
+      const destination = modelShortName();
+      const isAuditOnProgram = source === 'Program' && destination === 'Audit';
+      const isIssueOnAssessment = source === 'Assessment'
+        && destination === 'Issue';
+
+      if (isAuditOnProgram || isIssueOnAssessment) {
         return options.fn(options.contexts);
       }
 

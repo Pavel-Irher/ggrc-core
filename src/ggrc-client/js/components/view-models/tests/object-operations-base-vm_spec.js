@@ -19,23 +19,26 @@ describe('object-operations-base viewModel', function () {
     baseVM = ObjectOperationsBaseVM();
   });
 
-  describe('availableTypes() method', function () {
-    it('calls getMappingList', function () {
-      spyOn(Mappings, 'getMappingList');
-      spyOn(modelsUtils, 'groupTypes');
+  describe('availableTypes() method', () => {
+    it('returns grouped types if object is not Assessment', () => {
       baseVM.attr('object', 'testObject');
 
-      baseVM.availableTypes();
-      expect(Mappings.getMappingList).toHaveBeenCalledWith('testObject');
+      spyOn(Mappings, 'getMappingList').and.returnValue('list');
+      spyOn(modelsUtils, 'groupTypes')
+        .withArgs('list')
+        .and.returnValue('grouped allowed to map objects');
+
+      expect(baseVM.availableTypes()).toEqual('grouped allowed to map objects');
     });
 
-    it('returns grouped types', () => {
-      spyOn(Mappings, 'getMappingList').and.returnValue('list');
-      spyOn(modelsUtils, 'groupTypes');
-      baseVM.attr('object', 'testObject');
+    it('returns grouped types if object is Assessment', () => {
+      baseVM.attr('object', 'Assessment');
 
-      baseVM.availableTypes();
-      expect(modelsUtils.groupTypes).toHaveBeenCalledWith('list');
+      spyOn(modelsUtils, 'groupTypes')
+        .withArgs(GGRC.config.snapshotable_objects)
+        .and.returnValue('grouped snapshotable objects');
+
+      expect(baseVM.availableTypes()).toEqual('grouped snapshotable objects');
     });
   });
 
