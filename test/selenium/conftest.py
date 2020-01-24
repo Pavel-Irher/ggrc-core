@@ -644,7 +644,7 @@ def programs_with_regulation(mapped_programs):
 
 @pytest.fixture()
 def issue():
-  """Create an issue mapped to the program"""
+  """Create an issue."""
   return rest_facade.create_issue(obj=None)
 
 
@@ -656,7 +656,7 @@ def issue_mapped_to_program(program):
 
 @pytest.fixture()
 def issue_mapped_to_audit(audit):
-  """Create an issue mapped to the program"""
+  """Create an issue mapped to the audit."""
   return rest_facade.create_issue(audit)
 
 

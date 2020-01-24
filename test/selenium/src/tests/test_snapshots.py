@@ -14,8 +14,10 @@ import pytest
 from lib import base, users
 from lib.constants import messages, objects, object_states, roles
 from lib.constants.element import Lhn, MappingStatusAttrs
+from lib.entities import entities_factory
 from lib.entities.entity import Representation
 from lib.factory import get_cls_webui_service, get_cls_rest_service
+from lib.page.widget import generic_widget
 from lib.rest_facades import roles_rest_facade
 from lib.service import rest_facade, webui_facade, webui_service
 from lib.utils.filter_utils import FilterUtils
@@ -475,47 +477,56 @@ class TestSnapshots(base.Test):
 
   @pytest.mark.smoke_tests
   @pytest.mark.parametrize(
-      "is_via_tw_map_btn_not_item, expected_snapshoted_control, obj",
-      [(True, "control", "assessment_w_mapped_control_w_issue"),
-       (True, "control", "assessment_wo_mapped_control_wo_issue"),
-       (False, "control", "assessment_w_mapped_control_w_issue"),
-       (False, "control", "assessment_wo_mapped_control_wo_issue")],
-      ids=["Via Tree View MAP btn (map snapshoted Control to Assessment)",
-           "Via Tree View MAP btn (map snapshoted Control to Issue using "
+      ["is_via_tw_btn_not_item", "is_issue_flow",
+       "expected_snapshoted_control", "obj"],
+      [(True, True, "control", "assessment_w_mapped_control"),
+       (True, False, "control", "assessment_wo_mapped_control"),
+       (False, False, "control", "assessment_wo_mapped_control")],
+      ids=["Via Tree View CREATE btn (map snapshoted Control to Issue using "
            "Assessment with mapped snapshoted Control)",
-           "Via Tree View item (map snapshoted Control to Assessment)",
-           "Via Tree View item (map snapshoted Control to Issue using "
-           "Assessment with mapped snapshoted Control)"],
+           "Via Tree View MAP btn (map snapshoted Control to Assessment)",
+           "Via Tree View item (map snapshoted Control to Assessment)"],
       indirect=["obj"])
   def test_destructive_mapping_of_objects_to_snapshots(
-      self, create_audit_with_control_and_update_control,
-      is_via_tw_map_btn_not_item, expected_snapshoted_control, obj, selenium
+      self, create_audit_with_control_and_update_control, is_issue_flow,
+      is_via_tw_btn_not_item, expected_snapshoted_control, obj, selenium
   ):
     """Check mapping of objects to Control's snapshots via UI using Unified
-    Mapper functionality (Tree View's 'MAP' button and item):
+    Mapper functionality (Tree View's 'MAP' or 'CREATE' button and item):
     - Assessments: using Audit's scope;
     - Issues: using auto-mapping in Assessment's with mapped snapshoted object
               scope.
     """
     audit_with_one_control = create_audit_with_control_and_update_control
-    is_issue_flow = obj["issue"] is not None
     expected_control = (
         audit_with_one_control[expected_snapshoted_control].repr_ui())
     source_obj_for_map, destination_obj_for_map = (
-        (obj["assessment"], obj["issue"]) if is_issue_flow else
+        (obj["assessment"], entities_factory.IssuesFactory().create())
+        if is_issue_flow else
         (obj["assessment"], expected_control))
-    obj_for_map = (destination_obj_for_map if is_via_tw_map_btn_not_item else
+    obj_for_map = (destination_obj_for_map if is_via_tw_btn_not_item else
                    source_obj_for_map)
     objs_ui_service = (
         get_cls_webui_service(objects.get_plural(obj_for_map.type))(selenium))
-    ui_action = ("map_objs_via_tree_view" if is_via_tw_map_btn_not_item else
-                 "map_objs_via_tree_view_item")
+
+    if is_via_tw_btn_not_item:
+      ui_action = ("create_obj_via_tree_view" if is_issue_flow else
+                   "map_objs_via_tree_view")
+    else:
+      ui_action = "map_objs_via_tree_view_item"
     getattr(objs_ui_service, ui_action)(
-        src_obj=(source_obj_for_map if is_via_tw_map_btn_not_item else
-                 audit_with_one_control["audit"]),
-        dest_objs=[destination_obj_for_map])
-    source_obj_for_controls = (obj["issue"] if is_issue_flow else
-                               obj["assessment"])
+        (source_obj_for_map if is_via_tw_btn_not_item else
+         audit_with_one_control["audit"]),
+        destination_obj_for_map if is_issue_flow else
+        [destination_obj_for_map])
+    if is_issue_flow:
+      issue_widget = generic_widget.Issues(selenium, objects.get_plural(
+          destination_obj_for_map.type))
+      destination_obj_for_map.url = (
+          issue_widget.tree_view.get_obj_url_from_tree_view_by_title(
+              destination_obj_for_map.title))
+    source_obj_for_controls = (destination_obj_for_map if is_issue_flow else
+                               source_obj_for_map)
     # check snapshoted Controls
     controls_ui_service = webui_service.ControlsService(
         selenium, is_versions_widget=is_issue_flow)
@@ -538,22 +549,22 @@ class TestSnapshots(base.Test):
   @pytest.mark.smoke_tests
   @pytest.mark.xfail(raises=IOError)
   @pytest.mark.parametrize(
-      "obj",
-      [pytest.param(None),
+      ["obj", "is_issue_flow"],
+      [pytest.param(None, False),
        pytest.param(
-          "assessment_w_mapped_control_w_issue",
+          "assessment_w_mapped_control_w_issue", True,
           marks=pytest.mark.skip(
               reason="Issue has another mapping flow to control")),
-       pytest.param("assessment_w_mapped_control_wo_issue")],
+       pytest.param("assessment_w_mapped_control", False)],
       ids=["Export of snapshoted Control from Audit's Info Page "
            "via mapped Controls' Tree View",
            "Export of snapshoted Control from Issue's Info Page "
            "via mapped Controls' Tree View",
            "Export of snapshoted Control from Assessment's Info Page "
            "via mapped Controls' Tree View"],
-      indirect=True)
+      indirect=["obj"])
   def test_export_of_snapshoted_control_from_src_objs_pages_via_tree_view(
-      self, ge_user, create_tmp_dir,
+      self, ge_user, create_tmp_dir, is_issue_flow,
       create_audit_with_control_and_update_control, obj, selenium
   ):
     """Check if snapshoted Control can be exported from (Audit's, Issue's,
@@ -567,7 +578,6 @@ class TestSnapshots(base.Test):
     - 'dynamic_relationships'.
     """
     audit_with_one_control = create_audit_with_control_and_update_control
-    is_issue_flow = obj is not None and obj["issue"] is not None
     dynamic_objects = (
         (obj["issue"] if is_issue_flow else obj["assessment"]) if obj
         else audit_with_one_control["audit"])
@@ -584,22 +594,20 @@ class TestSnapshots(base.Test):
         *Representation.tree_view_attrs_to_exclude)
 
   @pytest.fixture()
-  def assessment_wo_mapped_control_wo_issue(self, assessment):
-    """Create assessment without mapped control without issue."""
+  def assessment_wo_mapped_control(self, assessment):
+    """Create assessment without mapped control."""
     return {"assessment": assessment,
-            "issue": None,
             "expected_state": object_states.NOT_STARTED}
 
   @pytest.fixture()
-  def assessment_w_mapped_control_wo_issue(
+  def assessment_w_mapped_control(
       self, create_audit_with_control_and_update_control, assessment
   ):
-    """Create assessment with mapped control without issue."""
+    """Create assessment with mapped control."""
     rest_facade.map_to_snapshot(
         assessment, create_audit_with_control_and_update_control["control"],
         create_audit_with_control_and_update_control["audit"])
     return {"assessment": assessment,
-            "issue": None,
             "expected_state": object_states.DRAFT}
 
   @pytest.fixture()
@@ -617,38 +625,36 @@ class TestSnapshots(base.Test):
 
   @pytest.mark.smoke_tests
   @pytest.mark.parametrize(
-      "obj",
-      ["assessment_wo_mapped_control_wo_issue",
-       "assessment_w_mapped_control_w_issue"],
+      ["obj", "is_issue_flow"],
+      [("assessment_wo_mapped_control", False),
+       ("assessment_w_mapped_control", True)],
       ids=["Mapping snapshot of Control to Assessment",
            "Mapping Assessment with mapped snapshot of Control to Issue"],
       indirect=["obj"]
   )
   def test_destructive_asmt_and_issue_mapped_to_origin_control(
       self, create_audit_with_control_and_update_control, assessment,
-      obj, selenium
+      obj, is_issue_flow, selenium
   ):
     """
     Check Assessment, Issue was mapped to origin Control after mapping:
     - snapshot of Control to Assessment;
     - Assessment with mapped snapshot of Control to Issue.
     """
-    is_issue_flow = obj["issue"] is not None
     origin_control = create_audit_with_control_and_update_control[
         "updated_control"]
     snapshoted_control = create_audit_with_control_and_update_control[
         "control"]
     expected_obj = (
-        obj["issue"] if is_issue_flow
+        entities_factory.IssuesFactory().create() if is_issue_flow
         else obj["assessment"]).repr_ui().update_attrs(
         status=obj["expected_state"])
-    ui_mapping_service, src_obj, dest_objs = (
-        (webui_service.IssuesService(selenium),
-         obj["assessment"], [obj["issue"]]) if is_issue_flow else
-        (webui_service.ControlsService(selenium), expected_obj,
-         [snapshoted_control]))
-    ui_mapping_service.map_objs_via_tree_view(
-        src_obj=src_obj, dest_objs=dest_objs)
+    if is_issue_flow:
+      webui_service.IssuesService().create_obj_via_tree_view(
+          obj["assessment"], expected_obj)
+    else:
+      webui_service.ControlsService().map_objs_via_tree_view(
+          expected_obj, [snapshoted_control])
     actual_objs = (get_cls_webui_service(
         objects.get_plural(expected_obj.type))(selenium).
         get_list_objs_from_tree_view(src_obj=origin_control))
@@ -728,13 +734,12 @@ class TestSnapshots(base.Test):
       - Get list of available objects from HNB;
       - Compare their with constant of expected objects accordingly.
     """
-    expected_objs_names_from_mapper = (
-        objects.ALL_SNAPSHOTABLE_OBJS + (objects.ISSUES, ))
+    expected_objs_names_from_mapper = objects.ALL_SNAPSHOTABLE_OBJS
     if obj.type == objects.get_obj_type(objects.ISSUES):
       rest_facade.map_objs(
           create_audit_with_control_and_update_control["audit"], obj)
       expected_objs_names_from_mapper = expected_objs_names_from_mapper + (
-          objects.PROGRAMS, objects.DOCUMENTS)
+          objects.PROGRAMS, objects.DOCUMENTS, objects.ISSUES)
     expected_objs_names_from_add_widget = expected_objs_names_from_mapper
     expected_objs_types_from_mapper = sorted(
         objects.get_normal_form(obj_name)
