@@ -60,17 +60,17 @@ class ProposalRow(object):
 
   def get_status(self):
     """Get proposal status."""
-    return self._row_element.div(class_name="object-history__state").text
+    return self._row_element.div(class_name="related-objects-list__state").text
 
   def get_author(self):
     """Get proposal author."""
     return self._row_element.element(
-        class_name="object-history__author-info").text.split(' ')[2]
+        class_name="related-objects-list__author-info").text.split(' ')[2]
 
   def get_datetime(self, as_datetime=True):
     """Get proposal datetime."""
     datetime_str = self._row_element.element(
-        class_name="object-history__date").text
+        class_name="related-objects-list__date").text
     if not as_datetime:
       return datetime_str
     return date_utils.ui_str_with_zone_to_datetime(datetime_str)
@@ -83,7 +83,7 @@ class ProposalRow(object):
 
     changes_list = []
     for row in self._row_element.elements(
-        class_name="object-history__row--attributes"
+        class_name="related-objects-list__row--attributes"
     ):
       row_element_texts = [element.text for element in row.elements(
           class_name="flex-size-1")]
@@ -97,7 +97,7 @@ class ProposalRow(object):
     """Get proposal comment."""
     comment = self._row_element.element(
         xpath=("//related-proposals-item/div[@class='flex-size-1 "
-               "object-history__attr']")).text
+               "related-objects-list__attr']")).text
     return None if comment == "None" else comment
 
   def has_review_apply_btn(self):

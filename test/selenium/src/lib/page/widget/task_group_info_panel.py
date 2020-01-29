@@ -63,7 +63,9 @@ class TaskGroupInfoPanel(base.WithBrowser):
 
   def _task_header_elements(self):
     """Returns task header elements."""
-    return self._root.elements(class_name="task_group_tasks__header-item")
+    return self._root.element(
+        class_name="related-objects-list__header").elements(
+        class_name="flex-size-6")
 
   def task_rows(self):
     """Returns task rows."""
@@ -82,7 +84,7 @@ class TaskRow(object):
     self._table_row = table_with_headers.TableRow(
         container=row_el,
         table_header_names=header_names,
-        cell_locator={"class_name": "task_group_tasks__list-item-column"}
+        cell_locator={"class_name": "flex-size-6"}
     )
 
   @property
