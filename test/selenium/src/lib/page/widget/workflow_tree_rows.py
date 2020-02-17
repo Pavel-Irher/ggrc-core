@@ -160,7 +160,7 @@ class SetupTaskGroupTreeItem(tree_widget.TreeItem):
 
   def obj_dict(self):
     """Returns an obj dict."""
-    dict_keys = ["title", "assignee", "description"]
+    dict_keys = ["title", "assignee", "details"]
     return self._table_row.obj_dict(self, dict_keys=dict_keys)
 
   @property
